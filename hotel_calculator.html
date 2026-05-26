@@ -351,8 +351,9 @@ function calculate() {
 
     rhtml += "<tr><td>晚数 × 间数</td><td>" + nights + " 晚 × " + rooms + " 间</td></tr>";
 
-    // ✅ 所需转码（修了 bug）
-    rhtml += "<tr><td>所需转码</td><td>" + requiredTotalCode + " 万</td></tr>";
+    // ✅ 所需转码（万 → 元）
+    var requiredTotalCodeYuan = requiredTotalCode * 10000;
+    rhtml += "<tr><td>所需转码</td><td>" + requiredTotalCodeYuan.toLocaleString() + " 元</td></tr>";
 
     rhtml += "<tr><td>房价（每间每晚）</td><td>" + (isWeekend(checkInDate)?rInfo.weekend:rInfo.weekday).toLocaleString() + "</td></tr>";
     rhtml += "<tr><td>总房价</td><td>" + totalRoomCost.toLocaleString() + "</td></tr>";
