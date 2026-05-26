@@ -113,63 +113,63 @@ tr:nth-child(even) td { background:#f2f7ff; }
 <script>
 var rates = {
   "L":        {"励盈1":123,"励盈2":120,"金门1":123,"金门8":118,"御匾会":120,"永利会":120,"上葡京老佛爷":125,"上葡京西塔":120},
-  "陈姐":      {"励盈1":120,"励盈2":118,"金门1":0,  "金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "洪大哥":    {"励盈1":112,"励盈2":110,"金门1":0,  "金门8":112,"御匾会":110,"永利会":110,"上葡京老佛爷":115,"上葡京西塔":110},
-  "李总":      {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "大圣":      {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "Ring":      {"励盈1":123,"励盈2":120,"金门1":122,"金门8":118,"御匾会":119,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118}
+  "陈姐":     {"励盈1":120,"励盈2":118,"金门1":0,  "金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "洪大哥":   {"励盈1":112,"励盈2":110,"金门1":0,  "金门8":112,"御匾会":110,"永利会":110,"上葡京老佛爷":115,"上葡京西塔":110},
+  "李总":     {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "大圣":     {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "Ring":     {"励盈1":123,"励盈2":120,"金门1":122,"金门8":118,"御匾会":119,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118}
 };
 
 var roomData = {
   "galaxy_jw": {
     name: "银河 — 万豪",
     rooms: {
-      "万豪大床 JW01": { need:100, weekday:1800, weekend:2200 },
-      "万豪双床 JW01T": { need:100, weekday:1800, weekend:2200 },
-      "万豪一房一厅 JW06": { need:250, weekday:2850, weekend:3650 }
+      "万豪大床 JW01": {need:100, weekday:1800, weekend:2200},
+      "万豪双床 JW01T": {need:100, weekday:1800, weekend:2200},
+      "万豪一房一厅 JW06": {need:250, weekday:2850, weekend:3650}
     }
   },
   "galaxy_rc": {
     name: "银河 — 丽思卡尔顿",
     rooms: {
-      "丽思一房一厅 RC01": { need:250, weekday:2500, weekend:3100 }
+      "丽思一房一厅 RC01": {need:250, weekday:2500, weekend:3100}
     }
   },
   "londoner_rk": {
     name: "伦敦人 — 名汇",
     rooms: {
-      "名汇普通房 RK": { need:60, weekday:1500, weekend:1800, special:2100 },
-      "名汇一房一厅 LS2": { need:120, weekday:2500, weekend:2800, special:3100 },
-      "名汇两房一厅 N2B": { need:400, weekday:6500, weekend:6800, special:7100 }
+      "名汇普通房 RK": {need:60, weekday:1500, weekend:1800, special:2100},
+      "名汇一房一厅 LS2": {need:120, weekday:2500, weekend:2800, special:3100},
+      "名汇两房一厅 N2B": {need:400, weekday:6500, weekend:6800, special:7100}
     }
   },
   "londoner_cm": {
     name: "伦敦人 — 御园",
     rooms: {
-      "御园一房一厅 CM1": { need:150, weekday:2500, weekend:2800, special:3100 },
-      "御园两房一厅 CK2": { need:400, weekday:6500, weekend:6800, special:7100 }
+      "御园一房一厅 CM1": {need:150, weekday:2500, weekend:2800, special:3100},
+      "御园两房一厅 CK2": {need:400, weekday:6500, weekend:6800, special:7100}
     }
   },
   "londoner_kc": {
     name: "伦敦人 — 伦敦人酒店",
     rooms: {
-      "伦敦人小套 KC": { need:60, weekday:1500, weekend:1800, special:2100 },
-      "伦敦人大套 KS": { need:120, weekday:2500, weekend:2800, special:3100 },
-      "伦敦人两房一厅 DBKD2": { need:400, weekday:6500, weekend:6800, special:7100 }
+      "伦敦人小套 KC": {need:60, weekday:1500, weekend:1800, special:2100},
+      "伦敦人大套 KS": {need:120, weekday:2500, weekend:2800, special:3100},
+      "伦敦人两房一厅 DBKD2": {need:400, weekday:6500, weekend:6800, special:7100}
     }
   },
   "wynn_palace": {
     name: "永利皇宫",
     rooms: {
-      "永利大床": { wdNeed:160, weNeed:250, wdPrice:1623, wePrice:2370 },
-      "永利双床": { wdNeed:180, weNeed:270, wdPrice:1910, wePrice:2715 },
-      "永利湖景大床": { wdNeed:220, weNeed:320, wdPrice:2198, wePrice:3118 },
-      "永利湖景双床": { wdNeed:240, weNeed:340, wdPrice:2313, wePrice:3233 },
-      "永利行政套房": { wdNeed:190, weNeed:280, wdPrice:1968, wePrice:2773 },
-      "永利珀丽蓁": { wdNeed:230, weNeed:320, wdPrice:2198, wePrice:3118 },
-      "永利珀丽双套": { wdNeed:230, weNeed:320, wdPrice:2313, wePrice:3233 },
-      "永利湖景珀丽套": { wdNeed:390, weNeed:580, wdPrice:3060, wePrice:4440 },
-      "永利湖景尊尚珀丽套": { wdNeed:390, weNeed:580, wdPrice:6050, wePrice:9500 }
+      "永利大床": {wdNeed:160, weNeed:250, wdPrice:1623, wePrice:2370},
+      "永利双床": {wdNeed:180, weNeed:270, wdPrice:1910, wePrice:2715},
+      "永利湖景大床": {wdNeed:220, weNeed:320, wdPrice:2198, wePrice:3118},
+      "永利湖景双床": {wdNeed:240, weNeed:340, wdPrice:2313, wePrice:3233},
+      "永利行政套房": {wdNeed:190, weNeed:280, wdPrice:1968, wePrice:2773},
+      "永利珀丽蓁": {wdNeed:230, weNeed:320, wdPrice:2198, wePrice:3118},
+      "永利珀丽双套": {wdNeed:230, weNeed:320, wdPrice:2313, wePrice:3233},
+      "永利湖景珀丽套": {wdNeed:390, weNeed:580, wdPrice:3060, wePrice:4440},
+      "永利湖景尊尚珀丽套": {wdNeed:390, weNeed:580, wdPrice:6050, wePrice:9500}
     }
   }
 };
@@ -246,7 +246,7 @@ function calc() {
     var dateLabel = "";
 
     if (hotelKey === "wynn_palace") {
-      if (dateType === "special") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "特殊日/周末"; }
+      if (dateType === "special") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "特殊日"; }
       else if (dateType === "weekend") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "周末"; }
       else { needAmount = room.wdNeed; roomPrice = room.wdPrice; dateLabel = "平日"; }
     } else {
@@ -293,7 +293,7 @@ function calc() {
     var mark = (a === agent) ? "★ " : "";
     var commStr = (r > 0) ? Math.round(c).toLocaleString() : "—";
     var profitStr = (a === "L") ? "—" : ((p >= 0 ? "+" : "") + p.toLocaleString());
-    h2 += "<tr><td>" + mark + a + "</td><td>" + (r > 0 ? r : "—") + "</td><td>" + commStr + "</td><td class="" + cls + "">" + profitStr + "</td></tr>";
+    h2 += "<tr><td>" + mark + a + "</td><td>" + (r > 0 ? r : "—") + "</td><td>" + commStr + "</td><td class=\"" + cls + "\">" + profitStr + "</td></tr>";
   }
   document.getElementById("t2").innerHTML = h2;
   document.getElementById("out").style.display = "block";
