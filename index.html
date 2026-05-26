@@ -2,29 +2,35 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>酒店退佣计算器</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:"Microsoft YaHei","微软雅黑",sans-serif; background:#f0f4f8; color:#333; padding:20px; }
-.box { max-width:900px; margin:0 auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
-h1 { text-align:center; color:#1a3a5c; margin-bottom:20px; font-size:22px; }
-.section { margin-bottom:20px; }
+body { font-family:"Microsoft YaHei","微软雅黑",sans-serif; background:#f0f4f8; color:#333; padding:10px; font-size:14px; }
+.box { max-width:900px; margin:0 auto; background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
+h1 { text-align:center; color:#1a3a5c; margin-bottom:14px; font-size:18px; }
+.section { margin-bottom:14px; }
 .label { font-size:13px; color:#555; margin-bottom:4px; font-weight:bold; }
-input, select { width:100%; padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:14px; margin-bottom:12px; }
-.row { display:flex; gap:12px; }
+input, select { width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:14px; margin-bottom:8px; }
+.row { display:flex; gap:8px; }
 .col { flex:1; }
 button { width:100%; padding:12px; border:none; border-radius:8px; background:linear-gradient(135deg,#4f81bd,#2f5496); color:#fff; font-size:16px; font-weight:bold; cursor:pointer; }
 button:hover { opacity:0.9; }
-#out { display:none; margin-top:20px; }
-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
-th { background:#2f5496; color:#fff; padding:8px 12px; text-align:center; }
-td { padding:8px 12px; border:1px solid #d0d7e5; text-align:center; }
+#out { display:none; margin-top:16px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; word-break:break-all; }
+th { background:#2f5496; color:#fff; padding:6px 8px; text-align:center; font-size:12px; }
+td { padding:6px 8px; border:1px solid #d0d7e5; text-align:center; font-size:12px; }
 tr:nth-child(even) td { background:#f2f7ff; }
 .highlight { background:#fffde7 !important; font-weight:bold; }
 .total { background:#e8f5e9 !important; font-weight:bold; color:#2e7d32; }
 .pos { color:#2e7d32; font-weight:bold; }
 .neg { color:#c62828; font-weight:bold; }
-.note { font-size:12px; color:#888; margin-top:8px; }
+.note { font-size:11px; color:#888; margin-top:6px; }
+.hotel-section { background:#f9fbfd; border-radius:8px; padding:10px; margin-bottom:10px; border:1px solid #d0d7e5; }
+.hotel-title { font-size:14px; font-weight:bold; color:#1a3a5c; margin-bottom:8px; }
+.pass { color:#2e7d32; font-weight:bold; }
+.fail { color:#c62828; font-weight:bold; }
+.charge { background:#ffebee !important; color:#c62828; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -59,18 +65,29 @@ tr:nth-child(even) td { background:#f2f7ff; }
 
 <div class="section">
   <div class="row">
+    <div class="col"><div class="label">转码金额（万）</div><input type="number" id="amount" placeholder="例：1000" step="0.1"></div>
+    <div class="col"><div class="label">车费</div><input type="number" id="carFee" placeholder="例：800" step="1"></div>
+    <div class="col"><div class="label">房消</div><input type="number" id="roomFee" placeholder="例：2600" step="1"></div>
+  </div>
+</div>
+
+<div class="section hotel-section">
+  <div class="hotel-title">送房信息（选填）</div>
+  <div class="label">入住日期</div>
+  <input type="date" id="checkinDate">
+  <div class="row" style="margin-top:8px;">
     <div class="col">
-      <div class="label">转码金额（万）</div>
-      <input type="number" id="amount" placeholder="例如：1000" step="0.1">
+      <div class="label">酒店</div>
+      <select id="hotel"><option value="">-- 选择酒店 --</option><option value="galaxy_jw">银河 — 万豪</option><option value="galaxy_rc">银河 — 丽思卡尔顿</option><option value="londoner_rk">伦敦人 — 名汇</option><option value="londoner_cm">伦敦人 — 御园</option><option value="londoner_kc">伦敦人 — 伦敦人酒店</option><option value="wynn_palace">永利皇宫</option></select>
     </div>
     <div class="col">
-      <div class="label">车费</div>
-      <input type="number" id="carFee" placeholder="例如：800" step="1">
+      <div class="label">房型</div>
+      <select id="roomType"><option value="">-- 先选酒店 --</option></select>
     </div>
-    <div class="col">
-      <div class="label">房消</div>
-      <input type="number" id="roomFee" placeholder="例如：2600" step="1">
-    </div>
+  </div>
+  <div class="row" style="margin-top:8px;">
+    <div class="col"><div class="label">晚数</div><input type="number" id="nights" value="1" min="1" step="1"></div>
+    <div class="col"><div class="label">间数</div><input type="number" id="rooms" value="1" min="1" step="1"></div>
   </div>
 </div>
 
@@ -78,11 +95,15 @@ tr:nth-child(even) td { background:#f2f7ff; }
 
 <div id="out">
   <div class="section">
-    <div class="label" style="font-size:16px; color:#1a3a5c;">计算结果</div>
+    <div class="label" style="font-size:15px; color:#1a3a5c;">计算结果</div>
     <table id="t1"></table>
   </div>
+  <div class="section" id="roomResultSection" style="display:none;">
+    <div class="label" style="font-size:15px; color:#1a3a5c;">送房达标判断</div>
+    <table id="t3"></table>
+  </div>
   <div class="section">
-    <div class="label" style="font-size:16px; color:#1a3a5c;">全部 Agent 价差对比</div>
+    <div class="label" style="font-size:15px; color:#1a3a5c;">全部 Agent 价差对比</div>
     <table id="t2"></table>
     <div class="note">绿色 = 你赚（价差为正）；红色 = 你亏；灰色 = 没价差</div>
   </div>
@@ -99,6 +120,85 @@ var rates = {
   "Ring":      {"励盈1":123,"励盈2":120,"金门1":122,"金门8":118,"御匾会":119,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118}
 };
 
+var roomData = {
+  "galaxy_jw": {
+    name: "银河 — 万豪",
+    rooms: {
+      "万豪大床 JW01": { need:100, weekday:1800, weekend:2200 },
+      "万豪双床 JW01T": { need:100, weekday:1800, weekend:2200 },
+      "万豪一房一厅 JW06": { need:250, weekday:2850, weekend:3650 }
+    }
+  },
+  "galaxy_rc": {
+    name: "银河 — 丽思卡尔顿",
+    rooms: {
+      "丽思一房一厅 RC01": { need:250, weekday:2500, weekend:3100 }
+    }
+  },
+  "londoner_rk": {
+    name: "伦敦人 — 名汇",
+    rooms: {
+      "名汇普通房 RK": { need:60, weekday:1500, weekend:1800, special:2100 },
+      "名汇一房一厅 LS2": { need:120, weekday:2500, weekend:2800, special:3100 },
+      "名汇两房一厅 N2B": { need:400, weekday:6500, weekend:6800, special:7100 }
+    }
+  },
+  "londoner_cm": {
+    name: "伦敦人 — 御园",
+    rooms: {
+      "御园一房一厅 CM1": { need:150, weekday:2500, weekend:2800, special:3100 },
+      "御园两房一厅 CK2": { need:400, weekday:6500, weekend:6800, special:7100 }
+    }
+  },
+  "londoner_kc": {
+    name: "伦敦人 — 伦敦人酒店",
+    rooms: {
+      "伦敦人小套 KC": { need:60, weekday:1500, weekend:1800, special:2100 },
+      "伦敦人大套 KS": { need:120, weekday:2500, weekend:2800, special:3100 },
+      "伦敦人两房一厅 DBKD2": { need:400, weekday:6500, weekend:6800, special:7100 }
+    }
+  },
+  "wynn_palace": {
+    name: "永利皇宫",
+    rooms: {
+      "永利大床": { wdNeed:160, weNeed:250, wdPrice:1623, wePrice:2370 },
+      "永利双床": { wdNeed:180, weNeed:270, wdPrice:1910, wePrice:2715 },
+      "永利湖景大床": { wdNeed:220, weNeed:320, wdPrice:2198, wePrice:3118 },
+      "永利湖景双床": { wdNeed:240, weNeed:340, wdPrice:2313, wePrice:3233 },
+      "永利行政套房": { wdNeed:190, weNeed:280, wdPrice:1968, wePrice:2773 },
+      "永利珀丽蓁": { wdNeed:230, weNeed:320, wdPrice:2198, wePrice:3118 },
+      "永利珀丽双套": { wdNeed:230, weNeed:320, wdPrice:2313, wePrice:3233 },
+      "永利湖景珀丽套": { wdNeed:390, weNeed:580, wdPrice:3060, wePrice:4440 },
+      "永利湖景尊尚珀丽套": { wdNeed:390, weNeed:580, wdPrice:6050, wePrice:9500 }
+    }
+  }
+};
+
+var specialDates = [
+  "2025-01-01","2025-01-28","2025-01-29","2025-01-30","2025-05-01","2025-10-01",
+  "2026-01-01","2026-01-17","2026-01-18","2026-01-19","2026-04-03","2026-04-04","2026-04-05","2026-05-01"
+];
+
+function getDateType(dateStr) {
+  if (specialDates.indexOf(dateStr) >= 0) return "special";
+  var d = new Date(dateStr);
+  var day = d.getDay();
+  if (day === 0 || day === 6) return "weekend";
+  return "weekday";
+}
+
+document.getElementById("hotel").addEventListener("change", function() {
+  var h = this.value;
+  var sel = document.getElementById("roomType");
+  sel.innerHTML = '<option value="">-- 选择房型 --</option>';
+  if (roomData[h]) {
+    var rooms = roomData[h].rooms;
+    for (var k in rooms) {
+      sel.innerHTML += '<option value="' + k + '">' + k + '</option>';
+    }
+  }
+});
+
 function calc() {
   var agent = document.getElementById("agent").value;
   var hall = document.getElementById("hall").value;
@@ -108,8 +208,8 @@ function calc() {
 
   if (amount <= 0) { alert("请填入转码金额！"); return; }
 
-  var rAgent = rates[agent][hall] || 0;
-  var rL = rates["L"][hall] || 0;
+  var rAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
+  var rL = rates["L"][hall];
   var commAgent = amount * rAgent / 100;
   var commL = amount * rL / 100;
   var actual = commAgent - carFee - roomFee;
@@ -121,19 +221,68 @@ function calc() {
   h1 += "<tr><td>退佣比例</td><td>" + rAgent + "‰（" + (rAgent/100) + "%）</td></tr>";
   h1 += "<tr><td>转码金额</td><td>" + fmt(amount) + " 万</td></tr>";
   h1 += "<tr><td>退佣金额</td><td>" + Math.round(commAgent).toLocaleString() + "</td></tr>";
-  if (carFee > 0) h1 += "<tr class=\"highlight\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + "</td></tr>";
-  if (roomFee > 0) h1 += "<tr class=\"highlight\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + "</td></tr>";
-  h1 += "<tr class=\"total\"><td>实出码粮</td><td>" + Math.round(actual).toLocaleString() + "</td></tr>";
+  if (carFee > 0) h1 += '<tr class="highlight"><td>扣：车费</td><td>- ' + carFee.toLocaleString() + "</td></tr>";
+  if (roomFee > 0) h1 += '<tr class="highlight"><td>扣：房消</td><td>- ' + roomFee.toLocaleString() + "</td></tr>";
+  h1 += '<tr class="total"><td>实出码粮</td><td>' + Math.round(actual).toLocaleString() + "</td></tr>";
   if (agent !== "L") {
-    h1 += "<tr class=\"total\"><td>L 获利（价差）</td><td>" + Math.round(profit).toLocaleString() + "</td></tr>";
+    h1 += '<tr class="total"><td>L 获利（价差）</td><td>' + Math.round(profit).toLocaleString() + "</td></tr>";
   }
   document.getElementById("t1").innerHTML = h1;
 
+  // 送房达标判断
+  var hotelKey = document.getElementById("hotel").value;
+  var roomKey = document.getElementById("roomType").value;
+  var checkin = document.getElementById("checkinDate").value;
+  var nights = parseInt(document.getElementById("nights").value) || 1;
+  var roomsCount = parseInt(document.getElementById("rooms").value) || 1;
+
+  if (hotelKey && roomKey && checkin) {
+    document.getElementById("roomResultSection").style.display = "block";
+    var hotel = roomData[hotelKey];
+    var room = hotel.rooms[roomKey];
+    var dateType = getDateType(checkin);
+    var needAmount = 0;
+    var roomPrice = 0;
+    var dateLabel = "";
+
+    if (hotelKey === "wynn_palace") {
+      if (dateType === "special") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "特殊日/周末"; }
+      else if (dateType === "weekend") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "周末"; }
+      else { needAmount = room.wdNeed; roomPrice = room.wdPrice; dateLabel = "平日"; }
+    } else {
+      if (dateType === "special") { needAmount = room.special || room.weekend; roomPrice = room.special || room.weekend; dateLabel = "特殊日"; }
+      else if (dateType === "weekend") { needAmount = room.weekend; roomPrice = room.weekend; dateLabel = "周末"; }
+      else { needAmount = room.weekday; roomPrice = room.weekday; dateLabel = "平日"; }
+    }
+
+    var totalRoomPrice = roomPrice * nights * roomsCount;
+    var isPass = (amount >= needAmount);
+    var shortFall = isPass ? 0 : (needAmount - amount);
+
+    var h3 = "<tr><th>项目</th><th>内容</th></tr>";
+    h3 += "<tr><td>入住日期</td><td>" + checkin + "（" + dateLabel + "）</td></tr>";
+    h3 += "<tr><td>酒店房型</td><td>" + hotel.name + " — " + roomKey + "</td></tr>";
+    h3 += "<tr><td>晚数 × 间数</td><td>" + nights + " 晚 × " + roomsCount + " 间</td></tr>";
+    h3 += "<tr><td>所需转码</td><td>" + needAmount + " 万</td></tr>";
+    h3 += "<tr><td>房价（每间每晚）</td><td>" + roomPrice.toLocaleString() + "</td></tr>";
+    h3 += "<tr><td>总房价</td><td>" + totalRoomPrice.toLocaleString() + "</td></tr>";
+    if (isPass) {
+      h3 += '<tr class="total"><td>达标？</td><td class="pass">✅ 达标，免费送房！</td></tr>';
+    } else {
+      h3 += '<tr class="charge"><td>达标？</td><td class="fail">❌ 未达标，差 ' + shortFall + ' 万转码</td></tr>';
+      h3 += '<tr class="charge"><td>需向客人收费</td><td>' + totalRoomPrice.toLocaleString() + "</td></tr>";
+    }
+    document.getElementById("t3").innerHTML = h3;
+  } else {
+    document.getElementById("roomResultSection").style.display = "none";
+  }
+
+  // Agent 对比表
   var h2 = "<tr><th>Agent</th><th>退佣比例</th><th>退佣金额</th><th>L 获利</th></tr>";
   var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
   for (var i = 0; i < agents.length; i++) {
     var a = agents[i];
-    var r = rates[a][hall] || 0;
+    var r = (rates[a] && rates[a][hall]) ? rates[a][hall] : 0;
     var c = amount * r / 100;
     var p = Math.round(commL - c);
     var cls = "note";
@@ -144,10 +293,11 @@ function calc() {
     var mark = (a === agent) ? "★ " : "";
     var commStr = (r > 0) ? Math.round(c).toLocaleString() : "—";
     var profitStr = (a === "L") ? "—" : ((p >= 0 ? "+" : "") + p.toLocaleString());
-    h2 += "<tr><td>" + mark + a + "</td><td>" + (r > 0 ? r : "—") + "</td><td>" + commStr + "</td><td class=\"" + cls + "\">" + profitStr + "</td></tr>";
+    h2 += "<tr><td>" + mark + a + "</td><td>" + (r > 0 ? r : "—") + "</td><td>" + commStr + "</td><td class="" + cls + "">" + profitStr + "</td></tr>";
   }
   document.getElementById("t2").innerHTML = h2;
   document.getElementById("out").style.display = "block";
+  document.getElementById("out").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function fmt(n) { return n.toLocaleString(); }
