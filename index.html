@@ -268,20 +268,29 @@ function calculate() {
   }
 
   // ========== 基本退佣计算 ==========
-  // 退佣比例已经是百分比（如116代表116%），直接计算
+  // amount 单位：万，rateAgent 单位：%（如116代表116%）
   var rateAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
   var rateL = rates["L"][hall];
+  // 退佣金额 = 转码金额(万) × 退佣比例(%) ÷ 100
   var commission = amount * rateAgent / 100;   // 1000万 × 116% = 1160万
   var commissionL = amount * rateL / 100;
   var actualPay = commission - carFee - roomFee;
   var profit = commissionL - commission;
+  
+  // ✅ 调试输出
+  console.log("【调试】Agent:", agent, "厅别:", hall);
+  console.log("【调试】转码金额 amount:", amount, "万");
+  console.log("【调试】退佣比例 rateAgent:", rateAgent, "%");
+  console.log("【调试】计算过程:", amount, "×", rateAgent, "÷ 100 =", commission);
+  console.log("【调试】退佣金额 commission:", commission, "万");
+  console.log("【调试】实出码粮 actualPay:", actualPay, "万");
 
   var html = "";
   html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
   html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
   html += "<tr><td>退佣比例</td><td>" + rateAgent + "% （即 " + (rateAgent/100).toFixed(2) + "%）</td></tr>";
   html += "<tr><td>转码金额</td><td>" + amount.toLocaleString() + " 万</td></tr>";
-  html += "<tr><td>退佣金额</td><td>" + Math.round(commission).toLocaleString() + "</td></tr>";
+  html += "<tr><td>退佣金额</td><td>" + Math.round(commission).toLocaleString() + " 万</td></tr>";
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + "</td></tr>";
   if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + "</td></tr>";
   html += "<tr class=\"total-row\"><td>实出码粮</td><td>" + Math.round(actualPay).toLocaleString() + "</td></tr>";
