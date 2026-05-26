@@ -300,7 +300,7 @@ function calculate() {
   var html = "";
   html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
   html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
-  html += "<tr><td>退佣比例</td><td>" + rateAgent + "%（即 " + (rateAgent/10000).toFixed(4) + " 倍）</td></tr>";
+  html += "<tr><td>退佣比例</td><td>" + (rateAgent/100).toFixed(2) + "%</td></tr>";
   html += "<tr><td>转码金额</td><td>" + amountYuan.toLocaleString() + " 元</td></tr>";
   html += "<tr><td>退佣金额</td><td><strong style=\"color:#d32f2f; font-size:16px;\">" + Math.round(commissionYuan).toLocaleString() + " 元</strong></td></tr>";
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
@@ -383,7 +383,7 @@ function calculate() {
       else if (pYuan < 0) cls = "profit-neg";
     }
     var marker = (ag === agent) ? "★ " : "　";
-    chtml += "<tr><td>" + marker + ag + "</td><td>" + (r > 0 ? r : "—") + "%</td><td>" + (r > 0 ? Math.round(cYuan).toLocaleString() : "—") + "</td><td class=\"" + cls + "\">" + (ag === "L" ? "—" : ((pYuan >= 0 ? "+" : "") + pYuan.toLocaleString())) + "</td></tr>";
+    chtml += "<tr><td>" + marker + ag + "</td><td>" + (r > 0 ? (r/100).toFixed(2) + "%" : "—") + "</td><td>" + (r > 0 ? Math.round(cYuan).toLocaleString() : "—") + "</td><td class=\"" + cls + "\">" + (ag === "L" ? "—" : ((pYuan >= 0 ? "+" : "") + pYuan.toLocaleString())) + "</td></tr>";
   }
   document.getElementById("compareTable").innerHTML = chtml;
 
