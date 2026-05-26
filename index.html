@@ -246,13 +246,13 @@ function calc() {
     var dateLabel = "";
 
     if (hotelKey === "wynn_palace") {
-      if (dateType === "special") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "特殊日"; }
-      else if (dateType === "weekend") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = "周末"; }
+      if (dateType === "special" || dateType === "weekend") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = (dateType === "special") ? "特殊日" : "周末"; }
       else { needAmount = room.wdNeed; roomPrice = room.wdPrice; dateLabel = "平日"; }
     } else {
-      if (dateType === "special") { needAmount = room.special || room.weekend; roomPrice = room.special || room.weekend; dateLabel = "特殊日"; }
-      else if (dateType === "weekend") { needAmount = room.weekend; roomPrice = room.weekend; dateLabel = "周末"; }
-      else { needAmount = room.weekday; roomPrice = room.weekday; dateLabel = "平日"; }
+      needAmount = room.need;
+      if (dateType === "special" && room.special) { roomPrice = room.special; dateLabel = "特殊日"; }
+      else if (dateType === "weekend") { roomPrice = room.weekend; dateLabel = "周末"; }
+      else { roomPrice = room.weekday; dateLabel = "平日"; }
     }
 
     var totalRoomPrice = roomPrice * nights * roomsCount;
