@@ -77,7 +77,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
   </div>
 
   <div class="row" style="margin-top:12px;">
-    <div class="field"><label>转码金额（万）</label><input type="number" id="amount" placeholder="例如：1000" step="0.1"></div>
+    <div class="field"><label>转码金额（元）</label><input type="number" id="amount" placeholder="例如：10000000" step="1"></div>
     <div class="field"><label>车费</label><input type="number" id="carFee" placeholder="例：800" step="1"></div>
     <div class="field"><label>房消</label><input type="number" id="roomFee" placeholder="例：2600" step="1"></div>
   </div>
@@ -276,8 +276,8 @@ function calculate() {
   var rateAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
   var rateL = rates["L"][hall];
   
-  // 转码金额（万）→ 转成元
-  var amountYuan = amount * 10000;
+  // 转码金额（元）- 直接读取，无需转换
+  var amountYuan = amount;
   
   // 退佣金额（元）= 转码金额(元) × 退佣比例 ÷ 10000
   var commissionYuan = amountYuan * rateAgent / 10000;   // 10,000,000 × 118 ÷ 10000 = 118,000 元
@@ -290,7 +290,7 @@ function calculate() {
   // ✅ 调试输出
   console.log("【调试】========== 开始计算 ==========");
   console.log("【调试】Agent:", agent, "厅别:", hall);
-  console.log("【调试】转码金额:", amount, "万 =", amountYuan, "元");
+  console.log("【调试】转码金额:", amountYuan, "元");
   console.log("【调试】退佣比例 rateAgent:", rateAgent, "%（即", (rateAgent/10000).toFixed(4), "倍）");
   console.log("【调试】退佣金额（元）:", commissionYuan, "=", amountYuan, "×", rateAgent, "÷ 10000");
   console.log("【调试】车费:", carFee, "元，房消:", roomFee, "元");
@@ -301,7 +301,7 @@ function calculate() {
   html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
   html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
   html += "<tr><td>退佣比例</td><td>" + rateAgent + "%（即 " + (rateAgent/10000).toFixed(4) + " 倍）</td></tr>";
-  html += "<tr><td>转码金额</td><td>" + amount.toLocaleString() + " 万（" + amountYuan.toLocaleString() + " 元）</td></tr>";
+  html += "<tr><td>转码金额</td><td>" + amountYuan.toLocaleString() + " 元</td></tr>";
   html += "<tr><td>退佣金额</td><td><strong style=\"color:#d32f2f; font-size:16px;\">" + Math.round(commissionYuan).toLocaleString() + " 元</strong></td></tr>";
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
   if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
