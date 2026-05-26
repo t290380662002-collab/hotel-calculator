@@ -1,306 +1,188 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>酒店退佣计算器</title>
+<title>酒店轉碼計算器</title>
 <style>
-* { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:"Microsoft YaHei","微软雅黑",sans-serif; background:#f0f4f8; color:#333; padding:10px; font-size:14px; }
-.box { max-width:900px; margin:0 auto; background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
-h1 { text-align:center; color:#1a3a5c; margin-bottom:14px; font-size:18px; }
-.section { margin-bottom:14px; }
-.label { font-size:13px; color:#555; margin-bottom:4px; font-weight:bold; }
-input, select { width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:14px; margin-bottom:8px; }
-.row { display:flex; gap:8px; }
-.col { flex:1; }
-button { width:100%; padding:12px; border:none; border-radius:8px; background:linear-gradient(135deg,#4f81bd,#2f5496); color:#fff; font-size:16px; font-weight:bold; cursor:pointer; }
-button:hover { opacity:0.9; }
-#out { display:none; margin-top:16px; }
-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; word-break:break-all; }
-th { background:#2f5496; color:#fff; padding:6px 8px; text-align:center; font-size:12px; }
-td { padding:6px 8px; border:1px solid #d0d7e5; text-align:center; font-size:12px; }
-tr:nth-child(even) td { background:#f2f7ff; }
-.highlight { background:#fffde7 !important; font-weight:bold; }
-.total { background:#e8f5e9 !important; font-weight:bold; color:#2e7d32; }
-.pos { color:#2e7d32; font-weight:bold; }
-.neg { color:#c62828; font-weight:bold; }
-.note { font-size:11px; color:#888; margin-top:6px; }
-.hotel-section { background:#f9fbfd; border-radius:8px; padding:10px; margin-bottom:10px; border:1px solid #d0d7e5; }
-.hotel-title { font-size:14px; font-weight:bold; color:#1a3a5c; margin-bottom:8px; }
-.pass { color:#2e7d32; font-weight:bold; }
-.fail { color:#c62828; font-weight:bold; }
-.charge { background:#ffebee !important; color:#c62828; font-weight:bold; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Microsoft YaHei', sans-serif; background: #f0f4f8; padding: 16px; }
+.calc { max-width: 420px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-weight: bold; color: #333; margin-bottom: 4px; font-size: 14px; }
+.fld input, .fld select { width: 100%; padding: 10px; border: 2px solid #ccc; border-radius: 8px; font-size: 16px; }
+.fld input:focus, .fld select:focus { border-color: #2980b9; outline: none; }
+.row { display: flex; gap: 10px; }
+.row .fld { flex: 1; }
+.result { background: #eaf6ff; border: 2px solid #2980b9; border-radius: 10px; padding: 16px; margin-top: 16px; }
+.result h3 { color: #1a5276; margin-bottom: 10px; font-size: 16px; }
+.rw { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #d4e6f9; font-size: 15px; }
+.rw:last-child { border-bottom: none; font-weight: bold; color: #c0392b; font-size: 17px; }
+.tag { display: inline-block; background: #27ae60; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 13px; margin-top: 8px; }
+.tag.no { background: #e74c3c; }
+.note { font-size: 12px; color: #888; margin-top: 12px; text-align: center; }
 </style>
 </head>
 <body>
-<div class="box">
-<h1>澳门酒店退佣计算器</h1>
+<div class="calc">
+  <h2>🏨 酒店轉碼計算器</h2>
 
-<div class="section">
-  <div class="label">选择 Agent</div>
-  <select id="agent">
-    <option value="L">L（自己）</option>
-    <option value="陈姐">陈姐</option>
-    <option value="洪大哥">洪大哥</option>
-    <option value="李总">李总</option>
-    <option value="大圣">大圣</option>
-    <option value="Ring">Ring</option>
-  </select>
-</div>
+  <div class="fld">
+    <label>代理人</label>
+    <select id="agent">
+      <option value="L">L（自己）</option>
+      <option value="陳姐">陳姐</option>
+      <option value="洪大哥">洪大哥</option>
+      <option value="李總">李總</option>
+      <option value="大聖">大聖</option>
+      <option value="Ring">Ring</option>
+    </select>
+  </div>
 
-<div class="section">
-  <div class="label">选择厅别</div>
-  <select id="hall">
-    <option value="励盈1">励盈1（新濠天地）</option>
-    <option value="励盈2">励盈2（新濠天地）</option>
-    <option value="金门1">金门1（银河）</option>
-    <option value="金门8">金门8（银河）</option>
-    <option value="御匾会">御匾会（伦敦人）</option>
-    <option value="永利会">永利会（永利皇宫）</option>
-    <option value="上葡京老佛爷">上葡京老佛爷（上葡京）</option>
-    <option value="上葡京西塔">上葡京西塔（上葡京）</option>
-  </select>
-</div>
+  <div class="fld">
+    <label>酒店 / 廳別</label>
+    <select id="hotel" onchange="onHotelChange()">
+      <option value="" data-code="" data-wday="" data-wend="">-- 請選擇 --</option>
+      <optgroup label="🏨 銀河 Galaxy">
+        <option value="銀河_金門8" data-code="JW01" data-wday="100" data-wend="100">銀河 - 金門8（萬豪大床/雙床）</option>
+        <option value="銀河_金門1" data-code="JW06" data-wday="250" data-wend="250">銀河 - 金門1（萬豪一房一廳）</option>
+        <option value="銀河_麗思" data-code="RC01" data-wday="250" data-wend="250">銀河 - 麗思卡爾頓一房一廳</option>
+      </optgroup>
+      <optgroup label="🎡 倫敦人 Londoner">
+        <option value="倫敦人_名匯普通" data-code="RK" data-wday="60" data-wend="60">倫敦人 - 名匯普通房</option>
+        <option value="倫敦人_名匯一房" data-code="LS2" data-wday="120" data-wend="120">倫敦人 - 名匯一房一廳</option>
+        <option value="倫敦人_御園一房" data-code="CM1" data-wday="150" data-wend="150">倫敦人 - 御園一房一廳</option>
+        <option value="倫敦人_酒店小套" data-code="KC" data-wday="60" data-wend="60">倫敦人 - 酒店小套</option>
+        <option value="倫敦人_酒店大套" data-code="KS" data-wday="120" data-wend="120">倫敦人 - 酒店大套</option>
+      </optgroup>
+      <optgroup label="🎰 新濠天地 CoD">
+        <option value="新濠_摩珀斯豪華" data-code="PK" data-wday="80" data-wend="80">新濠 - 摩珀斯豪華客房</option>
+        <option value="新濠_摩珀斯行政" data-code="CPK" data-wday="100" data-wend="100">新濠 - 摩珀斯行政豪華</option>
+        <option value="新濠_頤居尊尚" data-code="PK" data-wday="80" data-wend="80">新濠 - 頤居尊尚客房</option>
+        <option value="新濠_君悅豪華" data-code="DLXK" data-wday="60" data-wend="60">新濠 - 君悅豪華客房</option>
+        <option value="新濠_明星經典" data-code="CRK" data-wday="50" data-wend="50">新濠 - 明星匯經典客房</option>
+        <option value="新濠_巨星尊尚" data-code="SDK" data-wday="80" data-wend="80">新濠 - 巨星尊尚客房</option>
+        <option value="新濠_映鑽" data-code="EDK" data-wday="80" data-wend="80">新濠 - 映星匯映鑽客房</option>
+      </optgroup>
+      <optgroup label="👑 永利皇宮 Wynn Palace">
+        <option value="永利_大床" data-code="CRK" data-wday="160" data-wend="250">永利 - 大床客房</option>
+        <option value="永利_雙床" data-code="CRT" data-wday="180" data-wend="270">永利 - 雙床客房</option>
+        <option value="永利_湖景大床" data-code="CLSK" data-wday="220" data-wend="320">永利 - 湖景大床</option>
+        <option value="永利_行政套" data-code="EXEC" data-wday="190" data-wend="280">永利 - 行政套房</option>
+      </optgroup>
+    </select>
+  </div>
 
-<div class="section">
   <div class="row">
-    <div class="col"><div class="label">转码金额（万）</div><input type="number" id="amount" placeholder="例：1000" step="0.1"></div>
-    <div class="col"><div class="label">车费</div><input type="number" id="carFee" placeholder="例：800" step="1"></div>
-    <div class="col"><div class="label">房消</div><input type="number" id="roomFee" placeholder="例：2600" step="1"></div>
-  </div>
-</div>
-
-<div class="section hotel-section">
-  <div class="hotel-title">送房信息（选填）</div>
-  <div class="label">入住日期</div>
-  <input type="date" id="checkinDate">
-  <div class="row" style="margin-top:8px;">
-    <div class="col">
-      <div class="label">酒店</div>
-      <select id="hotel"><option value="">-- 选择酒店 --</option><option value="galaxy_jw">银河 — 万豪</option><option value="galaxy_rc">银河 — 丽思卡尔顿</option><option value="londoner_rk">伦敦人 — 名汇</option><option value="londoner_cm">伦敦人 — 御园</option><option value="londoner_kc">伦敦人 — 伦敦人酒店</option><option value="wynn_palace">永利皇宫</option></select>
+    <div class="fld">
+      <label>晚數</label>
+      <input type="number" id="nights" value="1" min="1" max="14" oninput="calc()">
     </div>
-    <div class="col">
-      <div class="label">房型</div>
-      <select id="roomType"><option value="">-- 先选酒店 --</option></select>
+    <div class="fld">
+      <label>每晩房價 (MOP)</label>
+      <input type="number" id="price" value="0" min="0" oninput="calc()">
     </div>
   </div>
-  <div class="row" style="margin-top:8px;">
-    <div class="col"><div class="label">晚数</div><input type="number" id="nights" value="1" min="1" step="1"></div>
-    <div class="col"><div class="label">间数</div><input type="number" id="rooms" value="1" min="1" step="1"></div>
-  </div>
-</div>
 
-<button onclick="calc()">开始计算</button>
+  <div class="row">
+    <div class="fld">
+      <label>所需轉碼 (萬/晚)</label>
+      <input type="number" id="codeNeed" value="100" min="0" oninput="calc()">
+    </div>
+    <div class="fld">
+      <label>車費 (MOP)</label>
+      <input type="number" id="carFee" value="0" min="0" oninput="calc()">
+    </div>
+  </div>
 
-<div id="out">
-  <div class="section">
-    <div class="label" style="font-size:15px; color:#1a3a5c;">计算结果</div>
-    <table id="t1"></table>
+  <div class="row">
+    <div class="fld">
+      <label>房消 (MOP)</label>
+      <input type="number" id="roomFee" value="0" min="0" oninput="calc()">
+    </div>
+    <div class="fld">
+      <label>退佣比例 (‰)</label>
+      <input type="number" id="rebate" value="120" min="0" max="200" oninput="calc()">
+    </div>
   </div>
-  <div class="section" id="roomResultSection" style="display:none;">
-    <div class="label" style="font-size:15px; color:#1a3a5c;">送房达标判断</div>
-    <table id="t3"></table>
+
+  <div class="result" id="result">
+    <h3>📊 計算結果</h3>
+      <div class="rw"><span>總轉碼需求</span><span id="r_totalCode">0 萬</span></div>
+      <div class="rw"><span>房價總額</span><span id="r_totalPrice">0 MOP</span></div>
+      <div class="rw"><span>車費 + 房消</span><span id="r_fee">0 MOP</span></div>
+      <div class="rw"><span>實出碼糧</span><span id="r_net">0 MOP</span></div>
+      <div class="rw"><span>是否達標</span><span id="r_ok">--</span></div>
   </div>
-  <div class="section">
-    <div class="label" style="font-size:15px; color:#1a3a5c;">全部 Agent 价差对比</div>
-    <table id="t2"></table>
-    <div class="note">绿色 = 你赚（价差为正）；红色 = 你亏；灰色 = 没价差</div>
-  </div>
-</div>
+
+  <div class="note">選擇代理人 + 酒店後，系統自動帶入退佣比例與轉碼需求</div>
 </div>
 
 <script>
-var rates = {
-  "L":        {"励盈1":123,"励盈2":120,"金门1":123,"金门8":118,"御匾会":120,"永利会":120,"上葡京老佛爷":125,"上葡京西塔":120},
-  "陈姐":     {"励盈1":120,"励盈2":118,"金门1":0,  "金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "洪大哥":   {"励盈1":112,"励盈2":110,"金门1":0,  "金门8":112,"御匾会":110,"永利会":110,"上葡京老佛爷":115,"上葡京西塔":110},
-  "李总":     {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "大圣":     {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
-  "Ring":     {"励盈1":123,"励盈2":120,"金门1":122,"金门8":118,"御匾会":119,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118}
+// 代理人退佣比例表（根據 MEMORY.md）
+const REBATE = {
+  "L":      { "銀河_金門8": 118, "銀河_金門1": 123, "新濠_摩珀斯豪華": 123, "新濠_摩珀斯行政": 123, "倫敦人_名匯普通": 120, "倫敦人_名匯一房": 120, "倫敦人_酒店小套": 120, "倫敦人_酒店大套": 120, "永利_大床": 120, "永利_雙床": 120, "新濠_頤居尊尚": 125, "新濠_君悅豪華": 120, "新濠_明星經典": 120, "新濠_巨星尊尚": 120, "新濠_映鑽": 120, "倫敦人_御園一房": 120, "銀河_麗思": 120 },
+  "陳姐":   { "銀河_金門8": 116, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
+  "洪大哥": { "銀河_金門8": 112, "新濠_摩珀斯豪華": 112, "新濠_摩珀斯行政": 110, "倫敦人_名匯普通": 110, "倫敦人_名匯一房": 110, "倫敦人_酒店小套": 110, "倫敦人_酒店大套": 110, "永利_大床": 110, "永利_雙床": 110, "新濠_頤居尊尚": 115, "新濠_君悅豪華": 110, "新濠_明星經典": 110, "新濠_巨星尊尚": 110, "新濠_映鑽": 110, "倫敦人_御園一房": 110, "銀河_麗思": 110 },
+  "李總":   { "銀河_金門8": 116, "銀河_金門1": 120, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
+  "大聖":   { "銀河_金門8": 116, "銀河_金門1": 120, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
+  "Ring":   { "銀河_金門8": 118, "銀河_金門1": 122, "新濠_摩珀斯豪華": 123, "新濠_摩珀斯行政": 120, "倫敦人_名匯普通": 119, "倫敦人_名匯一房": 119, "倫敦人_酒店小套": 119, "倫敦人_酒店大套": 119, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 119, "新濠_明星經典": 119, "新濠_巨星尊尚": 119, "新濠_映鑽": 119, "倫敦人_御園一房": 119, "銀河_麗思": 119 },
 };
 
-var roomData = {
-  "galaxy_jw": {
-    name: "银河 — 万豪",
-    rooms: {
-      "万豪大床 JW01": {need:100, weekday:1800, weekend:2200},
-      "万豪双床 JW01T": {need:100, weekday:1800, weekend:2200},
-      "万豪一房一厅 JW06": {need:250, weekday:2850, weekend:3650}
-    }
-  },
-  "galaxy_rc": {
-    name: "银河 — 丽思卡尔顿",
-    rooms: {
-      "丽思一房一厅 RC01": {need:250, weekday:2500, weekend:3100}
-    }
-  },
-  "londoner_rk": {
-    name: "伦敦人 — 名汇",
-    rooms: {
-      "名汇普通房 RK": {need:60, weekday:1500, weekend:1800, special:2100},
-      "名汇一房一厅 LS2": {need:120, weekday:2500, weekend:2800, special:3100},
-      "名汇两房一厅 N2B": {need:400, weekday:6500, weekend:6800, special:7100}
-    }
-  },
-  "londoner_cm": {
-    name: "伦敦人 — 御园",
-    rooms: {
-      "御园一房一厅 CM1": {need:150, weekday:2500, weekend:2800, special:3100},
-      "御园两房一厅 CK2": {need:400, weekday:6500, weekend:6800, special:7100}
-    }
-  },
-  "londoner_kc": {
-    name: "伦敦人 — 伦敦人酒店",
-    rooms: {
-      "伦敦人小套 KC": {need:60, weekday:1500, weekend:1800, special:2100},
-      "伦敦人大套 KS": {need:120, weekday:2500, weekend:2800, special:3100},
-      "伦敦人两房一厅 DBKD2": {need:400, weekday:6500, weekend:6800, special:7100}
-    }
-  },
-  "wynn_palace": {
-    name: "永利皇宫",
-    rooms: {
-      "永利大床": {wdNeed:160, weNeed:250, wdPrice:1623, wePrice:2370},
-      "永利双床": {wdNeed:180, weNeed:270, wdPrice:1910, wePrice:2715},
-      "永利湖景大床": {wdNeed:220, weNeed:320, wdPrice:2198, wePrice:3118},
-      "永利湖景双床": {wdNeed:240, weNeed:340, wdPrice:2313, wePrice:3233},
-      "永利行政套房": {wdNeed:190, weNeed:280, wdPrice:1968, wePrice:2773},
-      "永利珀丽蓁": {wdNeed:230, weNeed:320, wdPrice:2198, wePrice:3118},
-      "永利珀丽双套": {wdNeed:230, weNeed:320, wdPrice:2313, wePrice:3233},
-      "永利湖景珀丽套": {wdNeed:390, weNeed:580, wdPrice:3060, wePrice:4440},
-      "永利湖景尊尚珀丽套": {wdNeed:390, weNeed:580, wdPrice:6050, wePrice:9500}
-    }
+function onHotelChange() {
+  const sel = document.getElementById('hotel');
+  const opt = sel.options[sel.selectedIndex];
+  const code = opt.getAttribute('data-wday') || '';
+  const nights = parseInt(document.getElementById('nights').value) || 1;
+  if (code) {
+    document.getElementById('codeNeed').value = code;
   }
-};
-
-var specialDates = [
-  "2025-01-01","2025-01-28","2025-01-29","2025-01-30","2025-05-01","2025-10-01",
-  "2026-01-01","2026-01-17","2026-01-18","2026-01-19","2026-04-03","2026-04-04","2026-04-05","2026-05-01"
-];
-
-function getDateType(dateStr) {
-  if (specialDates.indexOf(dateStr) >= 0) return "special";
-  var d = new Date(dateStr);
-  var day = d.getDay();
-  if (day === 0 || day === 6) return "weekend";
-  return "weekday";
+  // 自動帶入代理人退佣
+  const agent = document.getElementById('agent').value;
+  const key = sel.value;
+  if (REBATE[agent] && REBATE[agent][key]) {
+    document.getElementById('rebate').value = REBATE[agent][key];
+  }
+  calc();
 }
-
-document.getElementById("hotel").addEventListener("change", function() {
-  var h = this.value;
-  var sel = document.getElementById("roomType");
-  sel.innerHTML = '<option value="">-- 选择房型 --</option>';
-  if (roomData[h]) {
-    var rooms = roomData[h].rooms;
-    for (var k in rooms) {
-      sel.innerHTML += '<option value="' + k + '">' + k + '</option>';
-    }
-  }
-});
 
 function calc() {
-  var agent = document.getElementById("agent").value;
-  var hall = document.getElementById("hall").value;
-  var amount = parseFloat(document.getElementById("amount").value) || 0;
-  var carFee = parseFloat(document.getElementById("carFee").value) || 0;
-  var roomFee = parseFloat(document.getElementById("roomFee").value) || 0;
+  const nights   = parseInt(document.getElementById('nights').value) || 1;
+  const price    = parseFloat(document.getElementById('price').value) || 0;
+  const codeOne  = parseFloat(document.getElementById('codeNeed').value) || 0;
+  const carFee  = parseFloat(document.getElementById('carFee').value) || 0;
+  const roomFee = parseFloat(document.getElementById('roomFee').value) || 0;
+  const rebate  = parseFloat(document.getElementById('rebate').value) || 0;
 
-  if (amount <= 0) { alert("请填入转码金额！"); return; }
+  // 核心修正：總轉碼 = 每晩轉碼 × 晚數
+  const totalCode = codeOne * nights;
+  const totalPrice = price * nights;
+  const totalFee  = carFee + roomFee;
+  // 實出碼糧 = 退佣 - 車費 - 房消（退佣 = 總轉碼 × 退佣比例‰）
+  const rebateAmt = totalCode * 10000 * (rebate / 1000); // 萬轉為單位
+  const net = rebateAmt - totalFee;
 
-  var rAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
-  var rL = rates["L"][hall];
-  var commAgent = amount * rAgent / 100;
-  var commL = amount * rL / 100;
-  var actual = commAgent - carFee - roomFee;
-  var profit = commL - commAgent;
+  document.getElementById('r_totalCode').textContent  = totalCode.toLocaleString() + ' 萬';
+  document.getElementById('r_totalPrice').textContent = totalPrice.toLocaleString() + ' MOP';
+  document.getElementById('r_fee').textContent        = totalFee.toLocaleString() + ' MOP';
 
-  var h1 = "";
-  h1 += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
-  h1 += "<tr><td>厅别</td><td>" + hall + "</td></tr>";
-  h1 += "<tr><td>退佣比例</td><td>" + rAgent + "‰（" + (rAgent/100) + "%）</td></tr>";
-  h1 += "<tr><td>转码金额</td><td>" + fmt(amount) + " 万</td></tr>";
-  h1 += "<tr><td>退佣金额</td><td>" + Math.round(commAgent).toLocaleString() + "</td></tr>";
-  if (carFee > 0) h1 += '<tr class="highlight"><td>扣：车费</td><td>- ' + carFee.toLocaleString() + "</td></tr>";
-  if (roomFee > 0) h1 += '<tr class="highlight"><td>扣：房消</td><td>- ' + roomFee.toLocaleString() + "</td></tr>";
-  h1 += '<tr class="total"><td>实出码粮</td><td>' + Math.round(actual).toLocaleString() + "</td></tr>";
-  if (agent !== "L") {
-    h1 += '<tr class="total"><td>L 获利（价差）</td><td>' + Math.round(profit).toLocaleString() + "</td></tr>";
-  }
-  document.getElementById("t1").innerHTML = h1;
+  const netElem = document.getElementById('r_net');
+  netElem.textContent = Math.round(net).toLocaleString() + ' MOP';
 
-  // 送房达标判断
-  var hotelKey = document.getElementById("hotel").value;
-  var roomKey = document.getElementById("roomType").value;
-  var checkin = document.getElementById("checkinDate").value;
-  var nights = parseInt(document.getElementById("nights").value) || 1;
-  var roomsCount = parseInt(document.getElementById("rooms").value) || 1;
-
-  if (hotelKey && roomKey && checkin) {
-    document.getElementById("roomResultSection").style.display = "block";
-    var hotel = roomData[hotelKey];
-    var room = hotel.rooms[roomKey];
-    var dateType = getDateType(checkin);
-    var needAmount = 0;
-    var roomPrice = 0;
-    var dateLabel = "";
-
-    if (hotelKey === "wynn_palace") {
-      if (dateType === "special" || dateType === "weekend") { needAmount = room.weNeed; roomPrice = room.wePrice; dateLabel = (dateType === "special") ? "特殊日" : "周末"; }
-      else { needAmount = room.wdNeed; roomPrice = room.wdPrice; dateLabel = "平日"; }
-    } else {
-      needAmount = room.need;
-      if (dateType === "special" && room.special) { roomPrice = room.special; dateLabel = "特殊日"; }
-      else if (dateType === "weekend") { roomPrice = room.weekend; dateLabel = "周末"; }
-      else { roomPrice = room.weekday; dateLabel = "平日"; }
-    }
-
-    var totalRoomPrice = roomPrice * nights * roomsCount;
-    var isPass = (amount >= needAmount);
-    var shortFall = isPass ? 0 : (needAmount - amount);
-
-    var h3 = "<tr><th>项目</th><th>内容</th></tr>";
-    h3 += "<tr><td>入住日期</td><td>" + checkin + "（" + dateLabel + "）</td></tr>";
-    h3 += "<tr><td>酒店房型</td><td>" + hotel.name + " — " + roomKey + "</td></tr>";
-    h3 += "<tr><td>晚数 × 间数</td><td>" + nights + " 晚 × " + roomsCount + " 间</td></tr>";
-    h3 += "<tr><td>所需转码</td><td>" + needAmount + " 万</td></tr>";
-    h3 += "<tr><td>房价（每间每晚）</td><td>" + roomPrice.toLocaleString() + "</td></tr>";
-    h3 += "<tr><td>总房价</td><td>" + totalRoomPrice.toLocaleString() + "</td></tr>";
-    if (isPass) {
-      h3 += '<tr class="total"><td>达标？</td><td class="pass">✅ 达标，免费送房！</td></tr>';
-    } else {
-      h3 += '<tr class="charge"><td>达标？</td><td class="fail">❌ 未达标，差 ' + shortFall + ' 万转码</td></tr>';
-      h3 += '<tr class="charge"><td>需向客人收费</td><td>' + totalRoomPrice.toLocaleString() + "</td></tr>";
-    }
-    document.getElementById("t3").innerHTML = h3;
+  const okElem = document.getElementById('r_ok');
+  if (totalPrice > 0 && totalCode > 0) {
+    const codePerNight = totalCode / nights;
+    okElem.textContent = '✅ 每晚 ' + codePerNight.toLocaleString() + ' 萬 × ' + nights + ' 晚 = ' + totalCode.toLocaleString() + ' 萬';
+    okElem.style.color = '#27ae60';
   } else {
-    document.getElementById("roomResultSection").style.display = "none";
+    okElem.textContent = '請輸入資料';
+    okElem.style.color = '#e74c3c';
   }
-
-  // Agent 对比表
-  var h2 = "<tr><th>Agent</th><th>退佣比例</th><th>退佣金额</th><th>L 获利</th></tr>";
-  var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
-  for (var i = 0; i < agents.length; i++) {
-    var a = agents[i];
-    var r = (rates[a] && rates[a][hall]) ? rates[a][hall] : 0;
-    var c = amount * r / 100;
-    var p = Math.round(commL - c);
-    var cls = "note";
-    if (a !== "L") {
-      if (p > 0) cls = "pos";
-      else if (p < 0) cls = "neg";
-    }
-    var mark = (a === agent) ? "★ " : "";
-    var commStr = (r > 0) ? Math.round(c).toLocaleString() : "—";
-    var profitStr = (a === "L") ? "—" : ((p >= 0 ? "+" : "") + p.toLocaleString());
-    h2 += "<tr><td>" + mark + a + "</td><td>" + (r > 0 ? r : "—") + "</td><td>" + commStr + "</td><td class=\"" + cls + "\">" + profitStr + "</td></tr>";
-  }
-  document.getElementById("t2").innerHTML = h2;
-  document.getElementById("out").style.display = "block";
-  document.getElementById("out").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function fmt(n) { return n.toLocaleString(); }
+// 網頁載入時自動計算一次
+window.addEventListener('DOMContentLoaded', calc);
 </script>
 </body>
 </html>
