@@ -295,7 +295,7 @@ function calculate() {
   var html = "";
   html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
   html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
-  html += "<tr><td>退佣比例</td><td>" + rateAgent + "% （即 " + (rateAgent/100).toFixed(4) + " 倍）</td></tr>";
+  html += "<tr><td>退佣比例</td><td>" + rateAgent + "% （即 " + (rateAgent/10000).toFixed(4) + " 倍）</td></tr>";
   html += "<tr><td>转码金额</td><td>" + amount.toLocaleString() + " 万（" + (amount*10000).toLocaleString() + " 元）</td></tr>";
   html += "<tr><td>退佣金额</td><td>" + Math.round(commissionYuan).toLocaleString() + " 元</td></tr>";
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
