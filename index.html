@@ -30,7 +30,7 @@ h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
 
   <div class="fld">
     <label>代理人</label>
-    <select id="agent">
+    <select id="agent" onchange="onAgentChange()">
       <option value="L">L（自己）</option>
       <option value="陳姐">陳姐</option>
       <option value="洪大哥">洪大哥</option>
@@ -41,7 +41,7 @@ h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
   </div>
 
   <div class="fld">
-    <label>酒店 / 廳別</label>
+    <label>賭場 / 廳別</label>
     <select id="hotel" onchange="onHotelChange()">
       <option value="" data-code="" data-wday="" data-wend="">-- 請選擇 --</option>
       <optgroup label="🏨 銀河 Galaxy">
@@ -49,27 +49,33 @@ h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
         <option value="銀河_金門1" data-code="JW06" data-wday="250" data-wend="250">銀河 - 金門1（萬豪一房一廳）</option>
         <option value="銀河_麗思" data-code="RC01" data-wday="250" data-wend="250">銀河 - 麗思卡爾頓一房一廳</option>
       </optgroup>
+      <optgroup label="🎰 新濠天地 CoD">
+        <option value="新濠_勵盈1" data-code="PK" data-wday="80" data-wend="80">新濠 - 勵盈1（摩珀斯豪華）</option>
+        <option value="新濠_勵盈2" data-code="CPK" data-wday="100" data-wend="100">新濠 - 勵盈2（摩珀斯行政）</option>
+        <option value="新濠_頤居" data-code="PK" data-wday="80" data-wend="80">新濠 - 頤居尊尚客房</option>
+        <option value="新濠_君悅" data-code="DLXK" data-wday="60" data-wend="60">新濠 - 君悅豪華客房</option>
+        <option value="新濠_明星" data-code="CRK" data-wday="50" data-wend="50">新濠 - 明星匯經典客房</option>
+        <option value="新濠_巨星" data-code="SDK" data-wday="80" data-wend="80">新濠 - 巨星尊尚客房</option>
+        <option value="新濠_映鑽" data-code="EDK" data-wday="80" data-wend="80">新濠 - 映星匯映鑽客房</option>
+      </optgroup>
       <optgroup label="🎡 倫敦人 Londoner">
         <option value="倫敦人_名匯普通" data-code="RK" data-wday="60" data-wend="60">倫敦人 - 名匯普通房</option>
         <option value="倫敦人_名匯一房" data-code="LS2" data-wday="120" data-wend="120">倫敦人 - 名匯一房一廳</option>
         <option value="倫敦人_御園一房" data-code="CM1" data-wday="150" data-wend="150">倫敦人 - 御園一房一廳</option>
         <option value="倫敦人_酒店小套" data-code="KC" data-wday="60" data-wend="60">倫敦人 - 酒店小套</option>
         <option value="倫敦人_酒店大套" data-code="KS" data-wday="120" data-wend="120">倫敦人 - 酒店大套</option>
-      </optgroup>
-      <optgroup label="🎰 新濠天地 CoD">
-        <option value="新濠_摩珀斯豪華" data-code="PK" data-wday="80" data-wend="80">新濠 - 摩珀斯豪華客房</option>
-        <option value="新濠_摩珀斯行政" data-code="CPK" data-wday="100" data-wend="100">新濠 - 摩珀斯行政豪華</option>
-        <option value="新濠_頤居尊尚" data-code="PK" data-wday="80" data-wend="80">新濠 - 頤居尊尚客房</option>
-        <option value="新濠_君悅豪華" data-code="DLXK" data-wday="60" data-wend="60">新濠 - 君悅豪華客房</option>
-        <option value="新濠_明星經典" data-code="CRK" data-wday="50" data-wend="50">新濠 - 明星匯經典客房</option>
-        <option value="新濠_巨星尊尚" data-code="SDK" data-wday="80" data-wend="80">新濠 - 巨星尊尚客房</option>
-        <option value="新濠_映鑽" data-code="EDK" data-wday="80" data-wend="80">新濠 - 映星匯映鑽客房</option>
+        <option value="倫敦人_御匾會" data-code="CM1" data-wday="150" data-wend="150">倫敦人 - 御匾會</option>
       </optgroup>
       <optgroup label="👑 永利皇宮 Wynn Palace">
-        <option value="永利_大床" data-code="CRK" data-wday="160" data-wend="250">永利 - 大床客房</option>
-        <option value="永利_雙床" data-code="CRT" data-wday="180" data-wend="270">永利 - 雙床客房</option>
+        <option value="永利_永利會" data-code="CRK" data-wday="160" data-wend="250">永利 - 永利會（大床客房）</option>
+        <option value="永利_永利會雙床" data-code="CRT" data-wday="180" data-wend="270">永利 - 永利會（雙床客房）</option>
         <option value="永利_湖景大床" data-code="CLSK" data-wday="220" data-wend="320">永利 - 湖景大床</option>
         <option value="永利_行政套" data-code="EXEC" data-wday="190" data-wend="280">永利 - 行政套房</option>
+        <option value="永利_柏麗會" data-code="CPK" data-wday="230" data-wend="320">永利 - 柏麗會</option>
+      </optgroup>
+      <optgroup label="🏛️ 上葡京">
+        <option value="上葡京_老佛爺" data-code="LF" data-wday="0" data-wend="0">上葡京 - 老佛爺</option>
+        <option value="上葡京_西塔" data-code="XT" data-wday="0" data-wend="0">上葡京 - 西塔</option>
       </optgroup>
     </select>
   </div>
@@ -80,7 +86,7 @@ h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
       <input type="number" id="nights" value="1" min="1" max="14" oninput="calc()">
     </div>
     <div class="fld">
-      <label>每晩房價 (MOP)</label>
+      <label>每晚房價 (MOP)</label>
       <input type="number" id="price" value="0" min="0" oninput="calc()">
     </div>
   </div>
@@ -120,29 +126,184 @@ h2 { text-align: center; color: #1a5276; margin-bottom: 16px; font-size: 20px; }
 </div>
 
 <script>
-// 代理人退佣比例表（根據 MEMORY.md）
+// 代理人退佣比例表（根據 MEMORY.md 完整資料）
 const REBATE = {
-  "L":      { "銀河_金門8": 118, "銀河_金門1": 123, "新濠_摩珀斯豪華": 123, "新濠_摩珀斯行政": 123, "倫敦人_名匯普通": 120, "倫敦人_名匯一房": 120, "倫敦人_酒店小套": 120, "倫敦人_酒店大套": 120, "永利_大床": 120, "永利_雙床": 120, "新濠_頤居尊尚": 125, "新濠_君悅豪華": 120, "新濠_明星經典": 120, "新濠_巨星尊尚": 120, "新濠_映鑽": 120, "倫敦人_御園一房": 120, "銀河_麗思": 120 },
-  "陳姐":   { "銀河_金門8": 116, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
-  "洪大哥": { "銀河_金門8": 112, "新濠_摩珀斯豪華": 112, "新濠_摩珀斯行政": 110, "倫敦人_名匯普通": 110, "倫敦人_名匯一房": 110, "倫敦人_酒店小套": 110, "倫敦人_酒店大套": 110, "永利_大床": 110, "永利_雙床": 110, "新濠_頤居尊尚": 115, "新濠_君悅豪華": 110, "新濠_明星經典": 110, "新濠_巨星尊尚": 110, "新濠_映鑽": 110, "倫敦人_御園一房": 110, "銀河_麗思": 110 },
-  "李總":   { "銀河_金門8": 116, "銀河_金門1": 120, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
-  "大聖":   { "銀河_金門8": 116, "銀河_金門1": 120, "新濠_摩珀斯豪華": 120, "新濠_摩珀斯行政": 118, "倫敦人_名匯普通": 118, "倫敦人_名匯一房": 118, "倫敦人_酒店小套": 118, "倫敦人_酒店大套": 118, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 118, "新濠_明星經典": 118, "新濠_巨星尊尚": 118, "新濠_映鑽": 118, "倫敦人_御園一房": 118, "銀河_麗思": 118 },
-  "Ring":   { "銀河_金門8": 118, "銀河_金門1": 122, "新濠_摩珀斯豪華": 123, "新濠_摩珀斯行政": 120, "倫敦人_名匯普通": 119, "倫敦人_名匯一房": 119, "倫敦人_酒店小套": 119, "倫敦人_酒店大套": 119, "永利_大床": 118, "永利_雙床": 118, "新濠_頤居尊尚": 123, "新濠_君悅豪華": 119, "新濠_明星經典": 119, "新濠_巨星尊尚": 119, "新濠_映鑽": 119, "倫敦人_御園一房": 119, "銀河_麗思": 119 },
+  "L": {
+    "銀河_金門8": 118,
+    "銀河_金門1": 123,
+    "新濠_勵盈1": 123,
+    "新濠_勵盈2": 120,
+    "倫敦人_御匾會": 120,
+    "永利_永利會": 120,
+    "永利_永利會雙床": 120,
+    "上葡京_老佛爺": 125,
+    "上葡京_西塔": 120,
+    "銀河_麗思": 120,
+    "新濠_頤居": 125,
+    "新濠_君悅": 120,
+    "新濠_明星": 120,
+    "新濠_巨星": 120,
+    "新濠_映鑽": 120,
+    "倫敦人_名匯普通": 120,
+    "倫敦人_名匯一房": 120,
+    "倫敦人_御園一房": 120,
+    "倫敦人_酒店小套": 120,
+    "倫敦人_酒店大套": 120,
+    "永利_湖景大床": 120,
+    "永利_行政套": 120,
+    "永利_柏麗會": 120
+  },
+  "陳姐": {
+    "銀河_金門8": 116,
+    "新濠_勵盈1": 120,
+    "新濠_勵盈2": 118,
+    "倫敦人_御匾會": 118,
+    "永利_永利會": 118,
+    "永利_永利會雙床": 118,
+    "上葡京_老佛爺": 123,
+    "上葡京_西塔": 118,
+    "銀河_金門1": 0,
+    "銀河_麗思": 118,
+    "新濠_頤居": 123,
+    "新濠_君悅": 118,
+    "新濠_明星": 118,
+    "新濠_巨星": 118,
+    "新濠_映鑽": 118,
+    "倫敦人_名匯普通": 118,
+    "倫敦人_名匯一房": 118,
+    "倫敦人_御園一房": 118,
+    "倫敦人_酒店小套": 118,
+    "倫敦人_酒店大套": 118,
+    "永利_湖景大床": 118,
+    "永利_行政套": 118,
+    "永利_柏麗會": 118
+  },
+  "洪大哥": {
+    "新濠_勵盈1": 112,
+    "新濠_勵盈2": 110,
+    "倫敦人_御匾會": 110,
+    "銀河_金門8": 112,
+    "永利_永利會": 110,
+    "永利_永利會雙床": 110,
+    "上葡京_老佛爺": 115,
+    "上葡京_西塔": 110,
+    "銀河_金門1": 0,
+    "銀河_麗思": 110,
+    "新濠_頤居": 115,
+    "新濠_君悅": 110,
+    "新濠_明星": 110,
+    "新濠_巨星": 110,
+    "新濠_映鑽": 110,
+    "倫敦人_名匯普通": 110,
+    "倫敦人_名匯一房": 110,
+    "倫敦人_御園一房": 110,
+    "倫敦人_酒店小套": 110,
+    "倫敦人_酒店大套": 110,
+    "永利_湖景大床": 110,
+    "永利_行政套": 110,
+    "永利_柏麗會": 110
+  },
+  "李總": {
+    "新濠_勵盈1": 120,
+    "新濠_勵盈2": 118,
+    "銀河_金門1": 120,
+    "倫敦人_御匾會": 118,
+    "銀河_金門8": 116,
+    "永利_永利會": 118,
+    "永利_永利會雙床": 118,
+    "上葡京_老佛爺": 123,
+    "上葡京_西塔": 118,
+    "銀河_麗思": 118,
+    "新濠_頤居": 123,
+    "新濠_君悅": 118,
+    "新濠_明星": 118,
+    "新濠_巨星": 118,
+    "新濠_映鑽": 118,
+    "倫敦人_名匯普通": 118,
+    "倫敦人_名匯一房": 118,
+    "倫敦人_御園一房": 118,
+    "倫敦人_酒店小套": 118,
+    "倫敦人_酒店大套": 118,
+    "永利_湖景大床": 118,
+    "永利_行政套": 118,
+    "永利_柏麗會": 118
+  },
+  "大聖": {
+    "銀河_金門8": 116,
+    "銀河_金門1": 120,
+    "新濠_勵盈1": 120,
+    "新濠_勵盈2": 118,
+    "倫敦人_御匾會": 118,
+    "永利_永利會": 118,
+    "永利_永利會雙床": 118,
+    "上葡京_老佛爺": 123,
+    "上葡京_西塔": 118,
+    "銀河_麗思": 118,
+    "新濠_頤居": 123,
+    "新濠_君悅": 118,
+    "新濠_明星": 118,
+    "新濠_巨星": 118,
+    "新濠_映鑽": 118,
+    "倫敦人_名匯普通": 118,
+    "倫敦人_名匯一房": 118,
+    "倫敦人_御園一房": 118,
+    "倫敦人_酒店小套": 118,
+    "倫敦人_酒店大套": 118,
+    "永利_湖景大床": 118,
+    "永利_行政套": 118,
+    "永利_柏麗會": 118
+  },
+  "Ring": {
+    "銀河_金門8": 118,
+    "銀河_金門1": 122,
+    "新濠_勵盈1": 123,
+    "新濠_勵盈2": 120,
+    "倫敦人_御匾會": 119,
+    "永利_永利會": 118,
+    "永利_永利會雙床": 118,
+    "上葡京_老佛爺": 123,
+    "上葡京_西塔": 118,
+    "銀河_麗思": 119,
+    "新濠_頤居": 123,
+    "新濠_君悅": 119,
+    "新濠_明星": 119,
+    "新濠_巨星": 119,
+    "新濠_映鑽": 119,
+    "倫敦人_名匯普通": 119,
+    "倫敦人_名匯一房": 119,
+    "倫敦人_御園一房": 119,
+    "倫敦人_酒店小套": 119,
+    "倫敦人_酒店大套": 119,
+    "永利_湖景大床": 118,
+    "永利_行政套": 118,
+    "永利_柏麗會": 118
+  }
 };
+
+function onAgentChange() {
+  // 代理人改變時，如果已選酒店則更新退佣
+  const hotelSel = document.getElementById('hotel');
+  if (hotelSel.value) {
+    onHotelChange();
+  }
+}
 
 function onHotelChange() {
   const sel = document.getElementById('hotel');
   const opt = sel.options[sel.selectedIndex];
   const code = opt.getAttribute('data-wday') || '';
   const nights = parseInt(document.getElementById('nights').value) || 1;
-  if (code) {
+  if (code && code !== '0') {
     document.getElementById('codeNeed').value = code;
   }
   // 自動帶入代理人退佣
   const agent = document.getElementById('agent').value;
   const key = sel.value;
   if (REBATE[agent] && REBATE[agent][key]) {
-    document.getElementById('rebate').value = REBATE[agent][key];
+    const rb = REBATE[agent][key];
+    if (rb > 0) {
+      document.getElementById('rebate').value = rb;
+    }
   }
   calc();
 }
@@ -155,7 +316,7 @@ function calc() {
   const roomFee = parseFloat(document.getElementById('roomFee').value) || 0;
   const rebate  = parseFloat(document.getElementById('rebate').value) || 0;
 
-  // 核心修正：總轉碼 = 每晩轉碼 × 晚數
+  // 核心修正：總轉碼 = 每晚轉碼 × 晚數
   const totalCode = codeOne * nights;
   const totalPrice = price * nights;
   const totalFee  = carFee + roomFee;
