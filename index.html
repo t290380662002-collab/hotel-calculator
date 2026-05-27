@@ -50,6 +50,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
 .date-detail .d-sat { color:#c62828; }
 .date-detail .d-special { color:#e91e63; font-weight:bold; }
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -134,6 +135,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
   <div class="card-title" style="margin-top:18px;">全部 Agent 价差对比</div>
   <table class="compare-table" id="compareTable"></table>
   <div class="note">绿色＝你赚（价差为正）；红色＝你亏；灰色＝没价差</div>
+  <button class="btn" id="exportBtn" onclick="exportToExcel()" style="margin-top:12px; background:#2e7d32;">📊 导出 Excel</button>
 </div>
 
 </div>
@@ -526,6 +528,132 @@ function calculate() {
 
   document.getElementById("result").style.display = "block";
   window.scrollTo({ top: document.getElementById("result").offsetTop - 10, behavior: "smooth" });
+}
+
+// ===== 导出 Excel =====
+function exportToExcel() {
+  var agent = document.getElementById("agent").value;
+  var hall = document.getElementById("hall").value;
+  var amount = parseFloat(document.getElementById("amount").value) || 0;
+  var carFee = parseFloat(document.getElementById("carFee").value) || 0;
+  var roomFee = parseFloat(document.getElementById("roomFee").value) || 0;
+
+  var checkInDate = document.getElementById("checkInDate").value;
+  var hotel = document.getElementById("hotel").value;
+  var roomType = document.getElementById("roomType").value;
+  var nights = parseInt(document.getElementById("nights").value) || 1;
+  var rooms = parseInt(document.getElementById("rooms").value) || 1;
+
+  var rateAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
+  var rateL = rates["L"][hall];
+  var amountYuan = amount;
+  var commissionYuan = amountYuan * rateAgent / 10000;
+  var commissionLYuan = amountYuan * rateL / 10000;
+  var actualPayYuan = commissionYuan - carFee - roomFee;
+  var profitYuan = commissionLYuan - commissionYuan;
+
+  // Sheet 1: 基本计算
+  var rows1 = [
+    ["澳门酒店退佣 — 计算记录"],
+    [""],
+    ["记录时间", new Date().toLocaleString('zh-CN')],
+    [""],
+    ["=== 基本信息 ==="],
+    ["Agent", agent],
+    ["厅别", (hallMap[hall]||hall) + " — " + hall],
+    ["退佣比例", (rateAgent/100).toFixed(2) + "%"],
+    [""],
+    ["=== 转码与佣金 ==="],
+    ["转码金额（元）", amountYuan],
+    ["退佣金额（元）", Math.round(commissionYuan)],
+    ["车费（元）", carFee],
+    ["房消（元）", roomFee],
+    ["实出码粮（元）", Math.round(actualPayYuan)],
+    [""],
+    ["=== L 价差 ==="],
+    ["L 退佣比例", (rateL/100).toFixed(2) + "%"],
+    ["L 退佣金额（元）", Math.round(commissionLYuan)],
+    ["L 获利（元）", Math.round(profitYuan)]
+  ];
+
+  // 送房信息
+  if (hotel && roomType) {
+    rows1.push([""]);
+    rows1.push(["=== 送房信息 ==="]);
+    rows1.push(["入住日期", checkInDate ? formatDate(checkInDate) : "—"]);
+    rows1.push(["晚数", nights]);
+    rows1.push(["间数", rooms]);
+    rows1.push(["酒店", hotel]);
+    rows1.push(["房型", roomType]);
+
+    if (roomData[hotel] && roomData[hotel][roomType]) {
+      var rInfo = roomData[hotel][roomType];
+      var reqCode = rInfo.code * nights * rooms * 10000;
+      var dailyResult = calculateDailyDetails(checkInDate, nights, rInfo, hotel);
+      var totalCost = 0;
+      for (var di = 0; di < dailyResult.details.length; di++) totalCost += dailyResult.details[di].price;
+      totalCost *= rooms || 1;
+      if (!dailyResult.details.length) totalCost = rInfo.weekday * nights * rooms;
+      rows1.push(["所需转码（元）", reqCode.toLocaleString()]);
+      rows1.push(["总房价（元）", totalCost.toLocaleString()]);
+      rows1.push(["达标？", amount >= rInfo.code * nights * rooms ? "✓ 达标" : "✗ 未达标"]);
+    }
+  }
+
+  // Sheet 2: Agent 对比
+  var rows2 = [["Agent", "退佣比例", "退佣金额（元）", "L 获利（元）"]];
+  var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
+  for (var i = 0; i < agents.length; i++) {
+    var ag = agents[i];
+    var r = (rates[ag] && rates[ag][hall]) ? rates[ag][hall] : 0;
+    var cY = amountYuan * r / 10000;
+    var pY = Math.round(commissionLYuan - cY);
+    rows2.push([ag, r > 0 ? (r/100).toFixed(2) + "%" : "—", r > 0 ? Math.round(cY) : "—", ag === "L" ? "—" : pY]);
+  }
+
+  // Sheet 3: 逐日晚价明细
+  var rows3 = [];
+  if (hotel && roomType && roomData[hotel] && roomData[hotel][roomType] && checkInDate) {
+    var rInfo2 = roomData[hotel][roomType];
+    var dr = calculateDailyDetails(checkInDate, nights, rInfo2, hotel);
+    rows3 = [["日期", "星期", "类型", "单价（元）", "间数", "小计（元）"]];
+    for (var idx = 0; idx < dr.details.length; idx++) {
+      var dd = dr.details[idx];
+      rows3.push([dd.date, "周" + dd.weekDay, dd.type, dd.price, rooms, dd.price * rooms]);
+    }
+    if (dr.details.length > 0) {
+      var sumTotal = 0;
+      for (var si = 0; si < dr.details.length; si++) sumTotal += dr.details[si].price * rooms;
+      rows3.push(["", "", "合计", "", "", sumTotal]);
+    }
+  } else {
+    rows3 = [["（需填写入住日期和房型才生成逐日明细）"]];
+  }
+
+  // 创建工作簿
+  var wb = XLSX.utils.book_new();
+  var ws1 = XLSX.utils.aoa_to_sheet(rows1);
+  var ws2 = XLSX.utils.aoa_to_sheet(rows2);
+  var ws3 = XLSX.utils.aoa_to_sheet(rows3);
+
+  // 设置列宽
+  ws1['!cols'] = [{ wch: 20 }, { wch: 30 }];
+  ws2['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 16 }];
+  ws3['!cols'] = [{ wch: 14 }, { wch: 8 }, { wch: 10 }, { wch: 14 }, { wch: 8 }, { wch: 14 }];
+
+  XLSX.utils.book_append_sheet(wb, ws1, "计算结果");
+  XLSX.utils.book_append_sheet(wb, ws2, "Agent对比");
+  XLSX.utils.book_append_sheet(wb, ws3, "逐日晚价");
+
+  // 文件名含时间
+  var ts = new Date();
+  var fname = "酒店计算_" + ts.getFullYear() +
+    String(ts.getMonth()+1).padStart(2,'0') +
+    String(ts.getDate()).padStart(2,'0') + "_" +
+    String(ts.getHours()).padStart(2,'0') +
+    String(ts.getMinutes()).padStart(2,'0') + ".xlsx";
+
+  XLSX.writeFile(wb, fname);
 }
 
 // 初始化
