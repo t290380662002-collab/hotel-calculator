@@ -1,2 +1,538 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="refresh" content="0;url=hotel_calculator.html"></head><body><p>Redirecting to <a href="hotel_calculator.html">Hotel Calculator</a>...</p></body></html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>澳门酒店退佣计算器</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:"Microsoft YaHei","微软雅黑",sans-serif; background:#e8edf2; color:#333; }
+.container { max-width:680px; margin:16px auto; padding:12px; }
+h1 { text-align:center; color:#1a3a5c; margin-bottom:18px; font-size:20px; font-weight:normal; }
+.card { background:#fff; border-radius:10px; padding:18px; margin-bottom:14px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+.card-title { font-size:14px; font-weight:bold; color:#333; margin-bottom:12px; }
+.row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.field { flex:1; min-width:150px; }
+label { display:block; font-size:12px; color:#555; margin-bottom:3px; }
+input, select { width:100%; padding:7px 10px; border:1px solid #ccc; border-radius:5px; font-size:13px; transition:border 0.2s; background:#fafafa; }
+input:focus, select:focus { border-color:#4f81bd; outline:none; background:#fff; }
+input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
+.btn { display:block; width:100%; padding:11px; border:none; border-radius:7px; background:#4f7cbd; color:#fff; font-size:15px; font-weight:bold; cursor:pointer; margin-top:4px; transition:opacity 0.2s; }
+.btn:hover { opacity:0.9; }
+#result, #roomResult { display:none; }
+.result-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; }
+.result-table th, .result-table td { padding:8px 12px; text-align:left; border-bottom:1px solid #eee; }
+.result-table th { background:#f5f8ff; color:#333; font-weight:bold; font-size:12px; width:40%; }
+.result-table td { color:#333; }
+.highlight-row { background:#fffde7 !important; font-weight:bold; }
+.total-row { background:#e8f5e9 !important; font-weight:bold; color:#2e7d32; }
+.compare-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:12px; }
+.compare-table th, .compare-table td { padding:6px 8px; border:1px solid #ddd; text-align:center; }
+.compare-table th { background:#4f7cbd; color:#fff; font-size:12px; }
+.compare-table tr:nth-child(even) td { background:#f9fbff; }
+.profit-pos { color:#2e7d32; font-weight:bold; }
+.profit-neg { color:#c62828; font-weight:bold; }
+.profit-zero { color:#888; }
+.note { font-size:11px; color:#aaa; margin-top:6px; }
+.section-label { font-size:12px; color:#666; margin-bottom:6px; font-weight:normal; }
+.sub-card { background:#f7f9fc; border-radius:6px; padding:12px; margin-top:8px; }
+.room-result-table { width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; }
+.room-result-table th, .room-result-table td { padding:6px 10px; text-align:left; border-bottom:1px solid #e0e4ea; }
+.room-result-table th { background:#4f7cbd; color:#fff; }
+.room-result-table tr:nth-child(even) td { background:#f5f8fc; }
+.badge-ok { display:inline-block; background:#4caf50; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+.badge-no { display:inline-block;background:#ff9800;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;}
+.badge-special { display:inline-block;background:#e91e63;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;}
+.date-detail { font-size:11px; color:#666; line-height:1.6; max-height:150px; overflow-y:auto; background:#fafbfc; padding:8px; border-radius:4px; margin-top:6px; border:1px solid #eee; }
+.date-detail .d-row { display:flex; justify-content:space-between; padding:2px 0; }
+.date-detail .d-weekday { color:#333; }
+.date-detail .d-fri { color:#f57c00; }
+.date-detail .d-sat { color:#c62828; }
+.date-detail .d-special { color:#e91e63; font-weight:bold; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>澳门酒店退佣计算器</h1>
+
+<!-- 基本资料 -->
+<div class="card">
+  <div class="card-title">选择 Agent</div>
+  <div class="row">
+    <div class="field"><select id="agent">
+      <option value="L">L（自己）</option>
+      <option value="陈姐">陈姐</option>
+      <option value="洪大哥">洪大哥</option>
+      <option value="李总">李总</option>
+      <option value="大圣">大圣</option>
+      <option value="Ring">Ring</option>
+    </select></div>
+  </div>
+
+  <div class="card-title" style="margin-top:14px;">选择厅别</div>
+  <div class="row">
+    <div class="field"><select id="hall">
+      <option value="金门8">金门8（银河）</option>
+      <option value="金门1">金门1（银河）</option>
+      <option value="励盈1">励盈1（新濠天地）</option>
+      <option value="励盈2">励盈2（新濠天地）</option>
+      <option value="御匾会">御匾会（伦敦人）</option>
+      <option value="永利会">永利会（永利皇宫）</option>
+      <option value="上葡京老佛爷">上葡京老佛爷</option>
+      <option value="上葡京西塔">上葡京西塔</option>
+    </select></div>
+  </div>
+
+  <div class="row" style="margin-top:12px;">
+    <div class="field"><label>转码金额（元）</label><input type="number" id="amount" placeholder="例如：10000000" step="1"></div>
+    <div class="field"><label>车费</label><input type="number" id="carFee" placeholder="例：800" step="1"></div>
+    <div class="field"><label>房消</label><input type="number" id="roomFee" placeholder="例：2600" step="1"></div>
+  </div>
+</div>
+
+<!-- 送房信息 -->
+<div class="card">
+  <div class="section-label">送房信息（选填）</div>
+
+  <div class="card-title">入住日期</div>
+  <div class="row">
+    <div class="field"><input type="date" id="checkInDate" onchange="updateRoomInfo()"></div>
+  </div>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="field"><label>酒店</label><select id="hotel" onchange="updateRoomType()">
+      <option value="">— 请选择 —</option>
+      <option value="银河">银河 Galaxy Macau</option>
+      <option value="新濠天地">新濠天地 City of Dreams</option>
+      <option value="伦敦人">伦敦人 The Londoner</option>
+      <option value="永利皇宫">永利皇宫 Wynn Palace</option>
+      <option value="上葡京">上葡京</option>
+    </select></div>
+    <div class="field"><label>房型</label><select id="roomType" onchange="updateRoomInfo()"></select></div>
+  </div>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="field"><label>晚数</label><input type="number" id="nights" value="1" min="1" max="30" oninput="updateRoomInfo()"></div>
+    <div class="field"><label>间数</label><input type="number" id="rooms" value="1" min="1" max="20" oninput="updateRoomInfo()"></div>
+  </div>
+
+  <button class="btn" onclick="calculate()">开始计算</button>
+</div>
+
+<!-- 计算结果 -->
+<div class="card" id="result">
+  <div class="card-title">计算结果</div>
+  <table class="result-table" id="resultTable"></table>
+
+  <!-- 送房判断结果 -->
+  <div id="roomResult">
+    <div class="card-title" style="margin-top:18px;">送房达标判断</div>
+    <table class="room-result-table" id="roomResultTable"></table>
+    <div id="dateDetail" class="date-detail" style="display:none;"></div>
+  </div>
+
+  <div class="card-title" style="margin-top:18px;">全部 Agent 价差对比</div>
+  <table class="compare-table" id="compareTable"></table>
+  <div class="note">绿色＝你赚（价差为正）；红色＝你亏；灰色＝没价差</div>
+</div>
+
+</div>
+
+<script>
+// ===== 2026年倫敦人特殊日日期 =====
+const londonerSpecialDates = [
+  ["2026-01-01","2026-01-03"],   // 元旦 3天
+  ["2026-02-15","2026-02-23"],   // 春節 9天
+  ["2026-04-04","2026-04-06"],   // 清明 3天
+  ["2026-05-01","2026-05-05"],   // 51勞動節 5天
+  ["2026-06-19","2026-06-21"],   // 端午 3天
+  ["2026-09-25","2026-09-27"],   // 中秋 3天
+  ["2026-10-01","2026-10-07"]    // 國慶 7天
+];
+
+function isSpecialDate(dateStr) {
+  if (!dateStr) return false;
+  var d = new Date(dateStr + "T00:00:00");
+  for (var i = 0; i < londonerSpecialDates.length; i++) {
+    var s = new Date(londonerSpecialDates[i][0] + "T00:00:00");
+    var e = new Date(londonerSpecialDates[i][1] + "T23:59:59");
+    if (d >= s && d <= e) return true;
+  }
+  return false;
+}
+
+// ===== 房型数据（完整版） =====
+// 格式說明：
+//   銀河/永利/上葡京：{ code, weekday, weekend }  — 兩欄（平日 / 週末）
+//   新濠天地：        { code, weekday, friday, saturday } — 三欄（平日 / 週五 / 週六）
+//   倫敦人：          { code, weekday, weekend, special } — 三欄（日~四 / 週五六 / 特殊日）
+
+const roomData = {
+  "银河": {
+    "万豪(大床) JW01":     { code: 100, weekday: 1800,  weekend: 2200 },
+    "万豪(双床) JW01T":    { code: 100, weekday: 1800,  weekend: 2200 },
+    "万豪(一房一厅) JW06": { code: 250, weekday: 2850,  weekend: 3650 },
+    "丽思(一房一厅) RC01": { code: 250, weekday: 2500,  weekend: 3100 }
+  },
+
+  "新濠天地": {
+    // === Morpheus 摩珀斯 ===
+    "摩珀斯 豪华客房 PK":         { code: 80,  weekday: 1588,   friday: 2462,  saturday: 2807 },
+    "摩珀斯 行政豪华客房 CPK":    { code: 100, weekday: 2394,   friday: 3268,  saturday: 3613 },
+    "摩珀斯 豪华双床客房 PT":     { code: 80,  weekday: 1818,   friday: 2692,  saturday: 3037 },
+    "摩珀斯 行政豪华双床 CPT":    { code: 100, weekday: 2624,   friday: 3498,  saturday: 3843 },
+    "摩珀斯 豪华套房 PS":         { code: 120, weekday: 1933,   friday: 2807,  saturday: 3152 },
+    "摩珀斯 尊尚客房 ES":         { code: 200, weekday: 2738,   friday: 3612,  saturday: 3957 },
+    "摩珀斯 尊贵客房 S1":         { code: 1000,weekday: 3889,   friday: 5338,  saturday: 5683 },
+    "摩珀斯 泳池别墅(5F) P3":     { code: 3000,weekday: 33248,  friday: 41298, saturday: 41298 },
+    "摩珀斯 复式别墅(41F) G2":    { code: 3000,weekday: 38998,  friday: 47048, saturday: 47048 },
+    "摩珀斯 天际泳池别墅(40F)V3":{ code: 3000,weekday: 41298,  friday: 49348, saturday: 49348 },
+
+    // === Nüwa 颐居 ===
+    "颐居 尊尚客房 PK":           { code: 80,  weekday: 1208,   friday: 2082,  saturday: 2727 },
+    "颐居 行政尊尚大床 CPK":      { code: 80,  weekday: 1842,   friday: 2716,  saturday: 3061 },
+    "颐居 尊尚双床客房 PQ":       { code: 80,  weekday: 1438,   friday: 2312,  saturday: 2657 },
+    "颐居 行政尊尚双床 CPQ":      { code: 80,  weekday: 2072,   friday: 2946,  saturday: 3291 },
+    "颐居 豪华套房 DS":           { code: 120, weekday: 1898,   friday: 2772,  saturday: 3117 },
+    "颐居 尊尚客房 PS":           { code: 200, weekday: 2358,   friday: 3232,  saturday: 3577 },
+    "颐居 颐居客房 V1":           { code: 1000,weekday: 4483,   friday: 7991,  saturday: 8451 },
+
+    // === Grand Hyatt 君悦 ===
+    "君悦 豪华客房 DLXK":         { code: 60,  weekday: 1400,   friday: 1515,  saturday: 2299 },
+    "君悦 豪华双床客房 DLXT":     { code: 60,  weekday: 1400,   friday: 1515,  saturday: 2299 },
+    "君悦 套房 GRSK":             { code: 60,  weekday: 1663,   friday: 1778,  saturday: 2731 },
+    "君悦 双床套房 GRST":         { code: 60,  weekday: 1663,   friday: 1778,  saturday: 2731 },
+
+    // === Celebrity Tower 明星汇 ===
+    "明星汇 经典客房 CRK":        { code: 50,  weekday: 817,    friday: 990,   saturday: 1335 },
+    "明星汇 经典双床客房 CRT":     { code: 50,  weekday: 932,    friday: 1105,  saturday: 1450 },
+    "明星汇 豪华客房 CDK":        { code: 50,  weekday: 1047,   friday: 1220,  saturday: 1565 },
+    "明星汇 豪华双床客房 CDT":     { code: 50,  weekday: 1162,   friday: 1335,  saturday: 1680 },
+
+    // === Star Tower 巨星汇 ===
+    "巨星汇 尊尚客房 SDK":        { code: 80,  weekday: 1191,   friday: 1680,  saturday: 1910 },
+    "巨星汇 尊尚双床 SDT":         { code: 80,  weekday: 1421,   friday: 1910,  saturday: 2140 },
+    "巨星汇 行政客房 SPS":        { code: 200, weekday: 4176,   friday: 5671,  saturday: 5901 },
+    "巨星汇 套房 SGS":            { code: 1000,weekday: 4981,   friday: 8201,  saturday: 8891 },
+
+    // === Epic Tower 映星汇 ===
+    "映星汇 映钻客房 EDK":        { code: 80,  weekday: 1289,   friday: 2163,  saturday: 2508 },
+    "映星汇 映钻双床 EDT":        { code: 80,  weekday: 1519,   friday: 2393,  saturday: 2738 },
+    "映星汇 映钻湖景 EGI":        { code: 100, weekday: 2439,   friday: 3313,  saturday: 3658 },
+    "映星汇 映钻至尊 ES1":        { code: 200, weekday: 2899,   friday: 3773,  saturday: 4118 },
+    "映星汇 天际无边际墅 ES3":    { code: 3000,weekday: 22021,  friday: 27771, saturday: 30301 },
+    "映星汇 水心别墅 EP3":        { code: 3000,weekday: 27771,  friday: 33521, saturday: 36051 }
+  },
+
+  "伦敦人": {
+    // === 名汇 ===
+    "名汇 普通房 RK":          { code: 60,  weekday: 1500,  weekend: 1800,  special: 2100 },
+    "名汇 一房一厅 LS2":       { code: 120, weekday: 2500,  weekend: 2800,  special: 3100 },
+    "名汇 两房一厅 N2B":       { code: 400, weekday: 6500,  weekend: 6800,  special: 7100 },
+
+    // === 御园 ===
+    "御园 一房一厅 CM1":       { code: 150, weekday: 2500,  weekend: 2800,  special: 3100 },
+    "御园 两房一厅 CK2":       { code: 400, weekday: 6500,  weekend: 6800,  special: 7100 },
+
+    // === 伦敦人酒店 ===
+    "伦敦人 小套 KC":          { code: 60,  weekday: 1500,  weekend: 1800,  special: 2100 },
+    "伦敦人 大套 KS":          { code: 120, weekday: 2500,  weekend: 2800,  special: 3100 },
+    "伦敦人 两房一厅 DBKD2":   { code: 400, weekday: 6500,  weekend: 6800,  special: 7100 }
+  },
+
+  "永利皇宫": {
+    "大床":              { code: 160,  weekday: 1623,  weekend: 2370 },
+    "双床":              { code: 180,  weekday: 1910,  weekend: 2715 },
+    "湖景大床":          { code: 220,  weekday: 2198,  weekend: 3118 },
+    "湖景双床":          { code: 240,  weekday: 2313,  weekend: 3233 },
+    "行政套房":          { code: 190,  weekday: 1968,  weekend: 2773 },
+    "珀丽套":            { code: 230,  weekday: 2198,  weekend: 3118 },
+    "珀丽双套":          { code: 230,  weekday: 2313,  weekend: 3233 },
+    "湖景珀丽套":        { code: 390,  weekday: 3060,  weekend: 4440 },
+    "湖景尊尚珀丽套":    { code: 390,  weekday: 6050,  weekend: 9500 }
+  },
+
+  "上葡京": {
+    "老佛爷": { code: 0, weekday: 0, weekend: 0 },
+    "西塔":   { code: 0, weekday: 0, weekend: 0 }
+  }
+};
+
+// ===== Agent 退佣比例 =====
+const rates = {
+  "L":        {"励盈1":123,"励盈2":120,"金门1":123,"金门8":118,"御匾会":120,"永利会":120,"上葡京老佛爷":125,"上葡京西塔":120},
+  "陈姐":      {"励盈1":120,"励盈2":118,"金门1":0,   "金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "洪大哥":    {"励盈1":112,"励盈2":110,"金门1":0,   "金门8":112,"御匾会":110,"永利会":110,"上葡京老佛爷":115,"上葡京西塔":110},
+  "李总":      {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "大圣":      {"励盈1":120,"励盈2":118,"金门1":120,"金门8":116,"御匾会":118,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118},
+  "Ring":      {"励盈1":123,"励盈2":120,"金门1":122,"金门8":118,"御匾会":119,"永利会":118,"上葡京老佛爷":123,"上葡京西塔":118}
+};
+
+const hallMap = {
+  "励盈1":"新濠天地","励盈2":"新濠天地","金门1":"银河","金门8":"银河",
+  "御匾会":"伦敦人","永利会":"永利皇宫","上葡京老佛爷":"上葡京","上葡京西塔":"上葡京"
+};
+
+// 更新房型下拉菜单
+function updateRoomType() {
+  var hotel = document.getElementById("hotel").value;
+  var sel = document.getElementById("roomType");
+  sel.innerHTML = "<option value=''>— 请选择 —</option>";
+  if (hotel && roomData[hotel]) {
+    for (var r in roomData[hotel]) {
+      var opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r;
+      sel.appendChild(opt);
+    }
+  }
+  updateRoomInfo();
+}
+
+// 判断日期類型並返回對應價格
+function getPriceForNight(roomInfo, dateStr, hotelName) {
+  if (!dateStr) {
+    // 無日期，默認返回平日價
+    return { price: roomInfo.weekday, type: "平日" };
+  }
+
+  var d = new Date(dateStr + "T00:00:00");
+  var day = d.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+
+  // 倫敦人：先檢查特殊日
+  if (hotelName === "伦敦人" && roomInfo.special !== undefined) {
+    if (isSpecialDate(dateStr)) {
+      return { price: roomInfo.special, type: "特殊日" };
+    }
+  }
+
+  // 新濠天地 & 倫敦人（非特殊日）：三欄價格
+  if (hotelName === "新濠天地" || hotelName === "伦敦人") {
+    if (day === 5) return { price: roomInfo.friday || roomInfo.weekend, type: "周五" };
+    if (day === 6) return { price: roomInfo.saturday || roomInfo.weekend, type: "周六" };
+    return { price: roomInfo.weekday, type: "平日" };
+  }
+
+  // 銀河/永利/上葡京：兩欄價格
+  if (day === 5 || day === 6) {
+    return { price: roomInfo.weekend, type: "周末" };
+  }
+  return { price: roomInfo.weekday, type: "平日" };
+}
+
+// 格式化日期
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  var d = new Date(dateStr);
+  return d.getFullYear() + "/" +
+    String(d.getMonth()+1).padStart(2,'0') + "/" +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function getWeekDayName(dateStr) {
+  if (!dateStr) return "";
+  var d = new Date(dateStr);
+  var names = ["日","一","二","三","四","五","六"];
+  return names[d.getDay()];
+}
+
+// 更新房间信息（預覽用）
+function updateRoomInfo() {}
+
+// 計算每日價格詳情
+function calculateDailyDetails(checkInDate, nights, roomInfo, hotelName) {
+  var details = [];
+  var totals = { weekday: 0, fri: 0, sat: 0, special: 0, nights: 0 };
+  var d;
+
+  if (checkInDate) {
+    d = new Date(checkInDate + "T00:00:00");
+    for (var i = 0; i < nights; i++) {
+      var ds = d.getFullYear() + "-" +
+        String(d.getMonth()+1).padStart(2,'0') + "-" +
+        String(d.getDate()).padStart(2,'0');
+      var result = getPriceForNight(roomInfo, ds, hotelName);
+
+      details.push({
+        date: formatDate(ds),
+        weekDay: getWeekDayName(ds),
+        type: result.type,
+        price: result.price
+      });
+
+      if (result.type === "特殊日") totals.special++;
+      else if (result.type === "周六") totals.sat++;
+      else if (result.type === "周五") totals.fri++;
+      else totals.weekday++;
+
+      totals.nights++;
+      d.setDate(d.getDate() + 1);
+    }
+  }
+
+  return { details: details, totals: totals };
+}
+
+// 主计算函数
+function calculate() {
+  var agent = document.getElementById("agent").value;
+  var hall = document.getElementById("hall").value;
+  var amount = parseFloat(document.getElementById("amount").value) || 0;
+  var carFee = parseFloat(document.getElementById("carFee").value) || 0;
+  var roomFee = parseFloat(document.getElementById("roomFee").value) || 0;
+
+  // 送房信息
+  var checkInDate = document.getElementById("checkInDate").value;
+  var hotel = document.getElementById("hotel").value;
+  var roomType = document.getElementById("roomType").value;
+  var nights = parseInt(document.getElementById("nights").value) || 1;
+  var rooms = parseInt(document.getElementById("rooms").value) || 1;
+
+  if (amount <= 0 && (!hotel || !roomType)) {
+    alert("请填写转码金额或选择酒店房型！");
+    return;
+  }
+
+  // ========== 基本退佣计算 ==========
+  var rateAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
+  var rateL = rates["L"][hall];
+
+  var amountYuan = amount;
+
+  var commissionYuan = amountYuan * rateAgent / 10000;
+  var commissionLYuan = amountYuan * rateL / 10000;
+
+  var actualPayYuan = commissionYuan - carFee - roomFee;
+  var profitYuan = commissionLYuan - commissionYuan;
+
+  console.log("【调试】Agent:", agent, "厅别:", hall);
+  console.log("【调试】转码金额:", amountYuan, "元");
+  console.log("【调试】退佣比例:", rateAgent, "=", (rateAgent/100).toFixed(2) + "%");
+  console.log("【调试】退佣金额:", Math.round(commissionYuan), "元");
+
+  var html = "";
+  html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
+  html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
+  html += "<tr><td>退佣比例</td><td>" + (rateAgent/100).toFixed(2) + "%</td></tr>";
+  html += "<tr><td>转码金额</td><td>" + amountYuan.toLocaleString() + " 元</td></tr>";
+  html += "<tr><td>退佣金额</td><td><strong style=\"color:#d32f2f; font-size:16px;\">" + Math.round(commissionYuan).toLocaleString() + " 元</strong></td></tr>";
+  if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
+  if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
+  html += "<tr class=\"total-row\"><td>实出码粮</td><td><strong>" + Math.round(actualPayYuan).toLocaleString() + " 元</strong></td></tr>";
+  if (agent !== "L") {
+    html += "<tr style=\"background:#e3f2fd\" class=\"total-row\"><td>L 获利（价差）</td><td>" + Math.round(profitYuan).toLocaleString() + " 元</td></tr>";
+  }
+  document.getElementById("resultTable").innerHTML = html;
+
+  // ========== 送房达标判断 ==========
+  var showRoomResult = false;
+  var rhtml = "";
+
+  if (hotel && roomType && roomData[hotel] && roomData[hotel][roomType]) {
+    showRoomResult = true;
+    var rInfo = roomData[hotel][roomType];
+
+    var requiredCodePerNight = rInfo.code;
+    var requiredTotalCode = requiredCodePerNight * nights * rooms;
+
+    // 使用逐日計算方式計算總房價
+    var dailyResult = calculateDailyDetails(checkInDate, nights, rInfo, hotel);
+    var totalRoomCost = 0;
+
+    if (dailyResult.details.length > 0) {
+      for (var di = 0; di < dailyResult.details.length; di++) {
+        totalRoomCost += dailyResult.details[di].price;
+      }
+      totalRoomCost *= rooms;
+    } else {
+      // 無日期，按全平時計算
+      totalRoomCost = rInfo.weekday * nights * rooms;
+    }
+
+    var dateLabel = checkInDate ? formatDate(checkInDate) : "—";
+    var weekLabel = checkInDate ? getWeekDayName(checkInDate) : "";
+    rhtml += "<tr><td>入住日期</td><td>" + dateLabel + " (周" + weekLabel + ") · " + nights + "晚 × " + rooms + "间</td></tr>";
+
+    rhtml += "<tr><td>酒店</td><td>" + hotel + "</td></tr>";
+    rhtml += "<tr><td>房型</td><td>" + roomType + "</td></tr>";
+
+    // 所需轉碼（code × 10000 = 元）
+    var requiredTotalCodeYuan = requiredTotalCode * 10000;
+    rhtml += "<tr><td>所需转码</td><td>" + requiredTotalCodeYuan.toLocaleString() + " 元</td></tr>";
+
+    // 房價拆解
+    var costDetail = "";
+    var t = dailyResult.totals;
+    if (dailyResult.details.length > 0) {
+      var parts = [];
+      if (t.weekday > 0) parts.push(t.weekday + "晚平日×" + rInfo.weekday);
+      if (t.fri > 0) parts.push(t.fri + "晚周五×" + (rInfo.friday||rInfo.weekend));
+      if (t.sat > 0) parts.push(t.sat + "晚周六×" + (rInfo.saturday||rInfo.weekend));
+      if (t.special > 0) parts.push(t.special + "晚特殊×" + rInfo.special);
+      costDetail = parts.join(" + ");
+      if (rooms > 1) costDetail += " ×" + rooms;
+    } else {
+      costDetail = nights + " 晚×" + rInfo.weekday;
+      if (rooms > 1) costDetail += " ×" + rooms;
+    }
+    rhtml += "<tr><td>总房价</td><td>" + totalRoomCost.toLocaleString() + " 元</td></tr>";
+    rhtml += "<tr><td>房价明细</td><td style=\"font-size:11px;color:#666;\">" + costDetail + "</td></tr>";
+
+    // 达标判断
+    var reached = amount >= requiredTotalCode;
+    rhtml += "<tr><td>达标？</td><td>" + (reached ?
+      '<span class="badge-ok">✓ 达标 · 免费送房！</span>' :
+      '<span class="badge-no">✗ 未达标 · 需收房费</span>') + "</td></tr>";
+
+    document.getElementById("roomResultTable").innerHTML = rhtml;
+
+    // 逐日價格詳情
+    var detailDiv = document.getElementById("dateDetail");
+    if (dailyResult.details.length > 0) {
+      var dh = "";
+      for (var idx = 0; idx < dailyResult.details.length; idx++) {
+        var dd = dailyResult.details[idx];
+        var cls = "d-" + dd.type.toLowerCase().replace(/[^a-z]/g, "");
+        if (cls === "d-周末") cls = "d-sat";
+        if (dd.type === "特殊日") cls = "d-special";
+        dh += '<div class="d-row"><span>' + dd.date + ' 周' + dd.weekDay + '</span><span class="' + cls + '">' + dd.type + ' · ' + dd.price.toLocaleString() + ' 元</span></div>';
+      }
+      detailDiv.innerHTML = "<div style='font-size:11px;color:#888;margin-bottom:4px;'>📅 逐日晚价明细：</div>" + dh;
+      detailDiv.style.display = "block";
+    } else {
+      detailDiv.style.display = "none";
+    }
+  }
+
+  document.getElementById("roomResult").style.display = showRoomResult ? "block" : "none";
+
+  // ========== Agent 对比表 ==========
+  var chtml = "<tr><th>Agent</th><th>退佣比例</th><th>退佣金额（元）</th><th>L 获利（元）</th></tr>";
+  var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
+  for (var i = 0; i < agents.length; i++) {
+    var ag = agents[i];
+    var r = (rates[ag] && rates[ag][hall]) ? rates[ag][hall] : 0;
+    var cYuan = amountYuan * r / 10000;
+    var pYuan = Math.round(commissionLYuan - cYuan);
+    var cls = "profit-zero";
+    if (ag !== "L") {
+      if (pYuan > 0) cls = "profit-pos";
+      else if (pYuan < 0) cls = "profit-neg";
+    }
+    var marker = (ag === agent) ? "★ " : "　";
+    chtml += "<tr><td>" + marker + ag + "</td><td>" + (r > 0 ? (r/100).toFixed(2) + "%" : "—") + "</td><td>" + (r > 0 ? Math.round(cYuan).toLocaleString() : "—") + "</td><td class=\"" + cls + "\">" + (ag === "L" ? "—" : ((pYuan >= 0 ? "+" : "") + pYuan.toLocaleString())) + "</td></tr>";
+  }
+  document.getElementById("compareTable").innerHTML = chtml;
+
+  document.getElementById("result").style.display = "block";
+  window.scrollTo({ top: document.getElementById("result").offsetTop - 10, behavior: "smooth" });
+}
+
+// 初始化
+updateRoomType();
+
+// 设置默认日期为今天
+document.getElementById("checkInDate").valueAsDate = new Date();
+</script>
+</body>
+</html>
