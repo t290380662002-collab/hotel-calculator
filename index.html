@@ -649,11 +649,20 @@ function calculate() {
     hotel: hotel,
     roomType: roomType,
     checkInDate: checkInDate,
+    checkOutDate: checkInDate ? formatDate(addDays(checkInDate, nights)) : "",
     nights: nights,
     rooms: rooms,
     reached: reached,
     gap: gap
   });
+}
+
+// ===== 日期加减 =====
+function addDays(dateStr, days) {
+  var d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
 }
 
 // ===== 自动保存到 localStorage 历史记录 =====
@@ -671,82 +680,72 @@ function exportToExcel() {
     return;
   }
 
-  // ---- Sheet 1: 全部历史记录（每笔一行）----
+  // ---- Sheet 1: 全部记录（横排）----
   var rows1 = [
-    ["#", "时间", "Agent", "厅别", "退佣比例", "转码金额（元）", "退佣金额（元）", "车费（元）", "房消（元）", "实出码粮（元）", "L获利（元）", "酒店", "房型", "入住日期", "晚数", "间数", "达标"]
+    ["Agent", "转码金额（元）", "入住日期", "退房日期", "退佣金额（元）", "实出码粮（元）", "车费（元）", "房消（元）", "L获利（元）"]
   ];
   for (var hi = 0; hi < history.length; hi++) {
     var h = history[hi];
     rows1.push([
-      hi + 1,
-      h.time,
       h.agent,
-      h.hallName + " — " + h.hall,
-      h.rateAgent > 0 ? (h.rateAgent/100).toFixed(2) + "%" : "—",
       h.amount,
+      h.checkInDate || "—",
+      h.checkOutDate || "—",
       h.commission,
+      h.actualPay,
       h.carFee,
       h.roomFee,
-      h.actualPay,
-      h.profit,
-      h.hotel || "—",
-      h.roomType || "—",
-      h.checkInDate || "—",
-      h.nights || "—",
-      h.rooms || "—",
-      h.reached ? "✓" : ("✗ 差" + h.gap.toLocaleString())
+      h.profit
     ]);
   }
 
   // 合计行
-  var totalAmount = 0, totalCommission = 0, totalCarFee = 0, totalRoomFee = 0, totalActualPay = 0;
+  var totalAmount = 0, totalCommission = 0, totalActualPay = 0, totalCarFee = 0, totalRoomFee = 0, totalProfit = 0;
   for (var ti = 0; ti < history.length; ti++) {
     totalAmount += history[ti].amount;
     totalCommission += history[ti].commission;
+    totalActualPay += history[ti].actualPay;
     totalCarFee += history[ti].carFee;
     totalRoomFee += history[ti].roomFee;
-    totalActualPay += history[ti].actualPay;
+    totalProfit += history[ti].profit;
   }
   rows1.push([""]);
-  rows1.push(["", "", "", "合计:", "", totalAmount.toLocaleString(), totalCommission.toLocaleString(), totalCarFee.toLocaleString(), totalRoomFee.toLocaleString(), totalActualPay.toLocaleString()]);
+  rows1.push(["合计:", totalAmount.toLocaleString(), "", "", totalCommission.toLocaleString(), totalActualPay.toLocaleString(), totalCarFee.toLocaleString(), totalRoomFee.toLocaleString(), totalProfit.toLocaleString()]);
 
-  // ---- Sheet 2: 最新一笔详细计算 ----
+  // ---- Sheet 2: 最新一笔详情 ----
   var last = history[history.length - 1];
   var rows2 = [
     ["=== 最新计算详情 ==="],
     [""],
     ["记录时间", last.time],
     [""],
-    ["=== 基本信息 ==="],
     ["Agent", last.agent],
     ["厅别", last.hallName + " — " + last.hall],
     ["退佣比例", last.rateAgent > 0 ? (last.rateAgent/100).toFixed(2) + "%" : "—"],
     [""],
-    ["=== 转码与佣金 ==="],
     ["转码金额（元）", last.amount],
     ["退佣金额（元）", last.commission],
     ["车费（元）", last.carFee],
     ["房消（元）", last.roomFee],
     ["实出码粮（元）", last.actualPay],
     [""],
-    ["=== L 价差 ==="],
     ["L 退佣比例", last.rateL > 0 ? (last.rateL/100).toFixed(2) + "%" : "—"],
     ["L 退佣金额（元）", last.commissionL],
     ["L 获利（元）", last.profit]
   ];
 
   if (last.hotel && last.roomType) {
-    rows2.push([""]);
-    rows2.push(["=== 送房信息 ==="]);
-    rows2.push(["酒店", last.hotel]);
-    rows2.push(["房型", last.roomType]);
-    rows2.push(["入住日期", last.checkInDate || "—"]);
-    rows2.push(["晚数", last.nights || "—"]);
-    rows2.push(["间数", last.rooms || "—"]);
-    rows2.push(["达标？", last.reached ? "✓ 达标" : "✗ 未达标（差 " + (last.gap||0).toLocaleString() + " 元）"]);
+    rows2.push([ "" ]);
+    rows2.push([ "=== 送房信息 ===" ]);
+    rows2.push([ "酒店", last.hotel ]);
+    rows2.push([ "房型", last.roomType ]);
+    rows2.push([ "入住日期", (last.checkInDate||"—") + " → " + (last.checkOutDate||"") ]);
+    rows2.push([ "晚数", last.nights || "—" ]);
+    rows2.push([ "间数", last.rooms || "—" ]);
+    rows2.push([ "达标？", last.reached ? "✓ 达标" : "✗ 未达标（差 " + (last.gap||0).toLocaleString() + " 元）" ]);
   }
 
-  // ---- Sheet 3: Agent 对比（基于最新一笔）----
+  // ---- Sheet 3: Agent 对比 ----
   var hall3 = last.hall;
   var amount3 = last.amount;
   var rateL3 = last.rateL;
@@ -769,7 +768,7 @@ function exportToExcel() {
   var ws3 = XLSX.utils.aoa_to_sheet(rows3);
 
   // 设置列宽
-  ws1['!cols'] = [{wch:4},{wch:20},{wch:8},{wch:18},{wch:10},{wch:16},{wch:14},{wch:10},{wch:10},{wch:14},{wch:12},{wch:10},{wch:12},{wch:10},{wch:6},{wch:18}];
+  ws1['!cols'] = [{wch:10},{wch:16},{wch:12},{wch:12},{wch:14},{wch:14},{wch:10},{wch:10},{wch:12}];
   ws2['!cols'] = [{ wch: 18 }, { wch: 35 }];
   ws3['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 16 }];
 
