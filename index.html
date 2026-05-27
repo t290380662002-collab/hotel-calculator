@@ -480,11 +480,14 @@ function calculate() {
     rhtml += "<tr><td>总房价</td><td>" + totalRoomCost.toLocaleString() + " 元</td></tr>";
     rhtml += "<tr><td>房价明细</td><td style=\"font-size:11px;color:#666;\">" + costDetail + "</td></tr>";
 
-    // 达标判断
-    var reached = amount >= requiredTotalCode;
-    rhtml += "<tr><td>达标？</td><td>" + (reached ?
-      '<span class="badge-ok">✓ 达标 · 免费送房！</span>' :
-      '<span class="badge-no">✗ 未达标 · 需收房费</span>') + "</td></tr>";
+    // 达标判断（amount是元，requiredTotalCodeYuan也是元）
+    var reached = amount >= requiredTotalCodeYuan;
+    var gap = Math.abs(amount - requiredTotalCodeYuan);
+    if (reached) {
+      rhtml += "<tr><td>达标？</td><td><span class=\"badge-ok\">✓ 达标 · 免费送房！</span>&nbsp;<span style=\"font-size:12px;color:#2e7d32;\">（超出 " + gap.toLocaleString() + " 元）</span></td></tr>";
+    } else {
+      rhtml += "<tr><td>达标？</td><td><span class=\"badge-no\">✗ 未达标 · 需收房费</span>&nbsp;<span style=\"font-size:12px;color:#d32f2f;\">（还差 " + gap.toLocaleString() + " 元）</span></td></tr>";
+    }
 
     document.getElementById("roomResultTable").innerHTML = rhtml;
 
@@ -596,7 +599,7 @@ function exportToExcel() {
       if (!dailyResult.details.length) totalCost = rInfo.weekday * nights * rooms;
       rows1.push(["所需转码（元）", reqCode.toLocaleString()]);
       rows1.push(["总房价（元）", totalCost.toLocaleString()]);
-      rows1.push(["达标？", amount >= rInfo.code * nights * rooms ? "✓ 达标" : "✗ 未达标"]);
+      rows1.push(["达标？", amount >= reqCode ? "✓ 达标" : "✗ 未达标"]);
     }
   }
 
