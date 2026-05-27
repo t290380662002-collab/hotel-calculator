@@ -315,9 +315,12 @@ function getPriceForNight(roomInfo, dateStr, hotelName) {
     return { price: roomInfo.weekday, type: "平日" };
   }
 
-  // 銀河/永利/上葡京：兩欄價格
-  if (day === 5 || day === 6) {
-    return { price: roomInfo.weekend, type: "周末" };
+  // 銀河/永利/上葡京：兩欄價（平日 / 週末）
+  if (day === 5) {
+    return { price: roomInfo.weekend, type: "周五" };
+  }
+  if (day === 6) {
+    return { price: roomInfo.weekend, type: "周六" };
   }
   return { price: roomInfo.weekday, type: "平日" };
 }
@@ -535,39 +538,39 @@ function calculate() {
       if (freeNights.length > 0 || paidNights.length > 0) {
         rhtml += "<tr style=\"background:#fff8e1\"><td colspan=\"2\"><strong style=\"font-size:13px;color:#e65100;\">📋 送房分配（优先送周末 / 不足收平日）</strong></td></tr>";
 
-        // 免费部分
-        var freeText = "";
-        var freeCountWeekday = 0, freeCountFri = 0, freeCountSat = 0, freeCountSpecial = 0;
+        // 免费部分 — 用实际nightList数据
+        var fCountSpecial = 0, fCountSat = 0, fCountFri = 0, fCountWeekday = 0;
         for (var fgi = 0; fgi < freeNights.length; fgi++) {
           var fn = freeNights[fgi];
-          if (fn.type === "特殊日") freeCountSpecial++;
-          else if (fn.type === "周六") freeCountSat++;
-          else if (fn.type === "周五") freeCountFri++;
-          else freeCountWeekday++;
+          if (fn.type === "特殊日") fCountSpecial++;
+          else if (fn.type === "周六") fCountSat++;
+          else if (fn.type === "周五") fCountFri++;
+          else fCountWeekday++;
         }
         var freeParts = [];
-        if (freeCountSpecial > 0) freeParts.push(freeCountSpecial + "晚特殊");
-        if (freeCountSat > 0) freeParts.push(freeCountSat + "晚周六");
-        if (freeCountFri > 0) freeParts.push(freeCountFri + "晚周五");
-        if (freeCountWeekday > 0) freeParts.push(freeCountWeekday + "晚平日");
+        if (fCountSpecial > 0) freeParts.push(fCountSpecial + "晚特殊");
+        if (fCountSat > 0) freeParts.push(fCountSat + "晚周六");
+        if (fCountFri > 0) freeParts.push(fCountFri + "晚周五");
+        if (fCountWeekday > 0) freeParts.push(fCountWeekday + "晚平日");
 
         rhtml += "<tr><td>✅ 免费送</td><td>" +
           "<span style=\"color:#2e7d32;font-weight:bold\">" + freeNights.length + " 晚</span> (" + freeParts.join(" + ") + ") · 转码覆盖</td></tr>";
 
-        // 收费部分
-        var paidCountWeekday = 0, paidCountFri = 0, paidCountSat = 0, paidCountSpecial = 0;
+        // 收费部分 — 用实际nightList数据构建，确保价格准确
+        var paidParts = [];
+        var pCountSpecial = 0, pCountSat = 0, pCountFri = 0, pCountWeekday = 0;
+        var pPriceSpecial = 0, pPriceSat = 0, pPriceFri = 0, pPriceWeekday = 0;
         for (var pgi = 0; pgi < paidNights.length; pgi++) {
           var pn = paidNights[pgi];
-          if (pn.type === "特殊日") paidCountSpecial++;
-          else if (pn.type === "周六") paidCountSat++;
-          else if (pn.type === "周五") paidCountFri++;
-          else paidCountWeekday++;
+          if (pn.type === "特殊日") { pCountSpecial++; pPriceSpecial = pn.price; }
+          else if (pn.type === "周六") { pCountSat++; pPriceSat = pn.price; }
+          else if (pn.type === "周五") { pCountFri++; pPriceFri = pn.price; }
+          else { pCountWeekday++; pPriceWeekday = pn.price; }
         }
-        var paidParts = [];
-        if (paidCountSpecial > 0) paidParts.push(paidCountSpecial + "晚特殊×" + rInfo.special);
-        if (paidCountSat > 0) paidParts.push(paidCountSat + "晚周六×" + (rInfo.saturday||rInfo.weekend));
-        if (paidCountFri > 0) paidParts.push(paidCountFri + "晚周五×" + (rInfo.friday||rInfo.weekend));
-        if (paidCountWeekday > 0) paidParts.push(paidCountWeekday + "晚平日×" + rInfo.weekday);
+        if (pCountSpecial > 0) paidParts.push(pCountSpecial + "晚特殊×" + pPriceSpecial);
+        if (pCountSat > 0) paidParts.push(pCountSat + "晚周六×" + pPriceSat);
+        if (pCountFri > 0) paidParts.push(pCountFri + "晚周五×" + pPriceFri);
+        if (pCountWeekday > 0) paidParts.push(pCountWeekday + "晚平日×" + pPriceWeekday);
 
         var paidDetail = paidParts.join(" + ");
         if (rooms > 1) paidDetail += " ×" + rooms;
@@ -594,7 +597,6 @@ function calculate() {
       for (var idx = 0; idx < dailyResult.details.length; idx++) {
         var dd = dailyResult.details[idx];
         var cls = "d-" + dd.type.toLowerCase().replace(/[^a-z]/g, "");
-        if (cls === "d-周末") cls = "d-sat";
         if (dd.type === "特殊日") cls = "d-special";
         dh += '<div class="d-row"><span>' + dd.date + ' 周' + dd.weekDay + '</span><span class="' + cls + '">' + dd.type + ' · ' + dd.price.toLocaleString() + ' 元</span></div>';
       }
