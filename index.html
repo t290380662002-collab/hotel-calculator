@@ -136,6 +136,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
   <table class="compare-table" id="compareTable"></table>
   <div class="note">绿色＝你赚（价差为正）；红色＝你亏；灰色＝没价差</div>
   <button class="btn" id="exportBtn" onclick="exportToExcel()" style="margin-top:12px; background:#2e7d32;">📊 导出 Excel</button>
+  <button class="btn" id="clearHistoryBtn" onclick="clearHistory()" style="margin-top:12px; margin-left:8px; background:#757575; font-size:13px;">🗑 清除记录</button>
 </div>
 
 </div>
@@ -629,181 +630,191 @@ function calculate() {
 
   document.getElementById("result").style.display = "block";
   window.scrollTo({ top: document.getElementById("result").offsetTop - 10, behavior: "smooth" });
+
+  // ========== 自动保存本次计算到历史记录 ==========
+  saveToHistory({
+    time: new Date().toLocaleString('zh-CN'),
+    agent: agent,
+    hall: hall,
+    hallName: (hallMap[hall]||hall),
+    rateAgent: rateAgent,
+    amount: amountYuan,
+    commission: Math.round(commissionYuan),
+    carFee: carFee,
+    roomFee: roomFee,
+    actualPay: Math.round(actualPayYuan),
+    rateL: rateL,
+    commissionL: Math.round(commissionLYuan),
+    profit: Math.round(profitYuan),
+    hotel: hotel,
+    roomType: roomType,
+    checkInDate: checkInDate,
+    nights: nights,
+    rooms: rooms,
+    reached: reached,
+    gap: gap
+  });
 }
 
-// ===== 导出 Excel =====
+// ===== 自动保存到 localStorage 历史记录 =====
+function saveToHistory(record) {
+  var history = JSON.parse(localStorage.getItem('hotelCalc_history') || '[]');
+  history.push(record);
+  localStorage.setItem('hotelCalc_history', JSON.stringify(history));
+}
+
+// ===== 导出 Excel（全部历史记录 + 自动下载） =====
 function exportToExcel() {
-  var agent = document.getElementById("agent").value;
-  var hall = document.getElementById("hall").value;
-  var amount = parseFloat(document.getElementById("amount").value) || 0;
-  var carFee = parseFloat(document.getElementById("carFee").value) || 0;
-  var roomFee = parseFloat(document.getElementById("roomFee").value) || 0;
+  var history = JSON.parse(localStorage.getItem('hotelCalc_history') || '[]');
+  if (history.length === 0) {
+    alert("还没有任何计算记录，请先进行一次计算！");
+    return;
+  }
 
-  var checkInDate = document.getElementById("checkInDate").value;
-  var hotel = document.getElementById("hotel").value;
-  var roomType = document.getElementById("roomType").value;
-  var nights = parseInt(document.getElementById("nights").value) || 1;
-  var rooms = parseInt(document.getElementById("rooms").value) || 1;
-
-  var rateAgent = (rates[agent] && rates[agent][hall]) ? rates[agent][hall] : 0;
-  var rateL = rates["L"][hall];
-  var amountYuan = amount;
-  var commissionYuan = amountYuan * rateAgent / 10000;
-  var commissionLYuan = amountYuan * rateL / 10000;
-  var actualPayYuan = commissionYuan - carFee - roomFee;
-  var profitYuan = commissionLYuan - commissionYuan;
-
-  // Sheet 1: 基本计算
+  // ---- Sheet 1: 全部历史记录（每笔一行）----
   var rows1 = [
-    ["澳门酒店退佣 — 计算记录"],
+    ["#", "时间", "Agent", "厅别", "退佣比例", "转码金额（元）", "退佣金额（元）", "车费（元）", "房消（元）", "实出码粮（元）", "L获利（元）", "酒店", "房型", "入住日期", "晚数", "间数", "达标"]
+  ];
+  for (var hi = 0; hi < history.length; hi++) {
+    var h = history[hi];
+    rows1.push([
+      hi + 1,
+      h.time,
+      h.agent,
+      h.hallName + " — " + h.hall,
+      h.rateAgent > 0 ? (h.rateAgent/100).toFixed(2) + "%" : "—",
+      h.amount,
+      h.commission,
+      h.carFee,
+      h.roomFee,
+      h.actualPay,
+      h.profit,
+      h.hotel || "—",
+      h.roomType || "—",
+      h.checkInDate || "—",
+      h.nights || "—",
+      h.rooms || "—",
+      h.reached ? "✓" : ("✗ 差" + h.gap.toLocaleString())
+    ]);
+  }
+
+  // 合计行
+  var totalAmount = 0, totalCommission = 0, totalCarFee = 0, totalRoomFee = 0, totalActualPay = 0;
+  for (var ti = 0; ti < history.length; ti++) {
+    totalAmount += history[ti].amount;
+    totalCommission += history[ti].commission;
+    totalCarFee += history[ti].carFee;
+    totalRoomFee += history[ti].roomFee;
+    totalActualPay += history[ti].actualPay;
+  }
+  rows1.push([""]);
+  rows1.push(["", "", "", "合计:", "", totalAmount.toLocaleString(), totalCommission.toLocaleString(), totalCarFee.toLocaleString(), totalRoomFee.toLocaleString(), totalActualPay.toLocaleString()]);
+
+  // ---- Sheet 2: 最新一笔详细计算 ----
+  var last = history[history.length - 1];
+  var rows2 = [
+    ["=== 最新计算详情 ==="],
     [""],
-    ["记录时间", new Date().toLocaleString('zh-CN')],
+    ["记录时间", last.time],
     [""],
     ["=== 基本信息 ==="],
-    ["Agent", agent],
-    ["厅别", (hallMap[hall]||hall) + " — " + hall],
-    ["退佣比例", (rateAgent/100).toFixed(2) + "%"],
+    ["Agent", last.agent],
+    ["厅别", last.hallName + " — " + last.hall],
+    ["退佣比例", last.rateAgent > 0 ? (last.rateAgent/100).toFixed(2) + "%" : "—"],
     [""],
     ["=== 转码与佣金 ==="],
-    ["转码金额（元）", amountYuan],
-    ["退佣金额（元）", Math.round(commissionYuan)],
-    ["车费（元）", carFee],
-    ["房消（元）", roomFee],
-    ["实出码粮（元）", Math.round(actualPayYuan)],
+    ["转码金额（元）", last.amount],
+    ["退佣金额（元）", last.commission],
+    ["车费（元）", last.carFee],
+    ["房消（元）", last.roomFee],
+    ["实出码粮（元）", last.actualPay],
     [""],
     ["=== L 价差 ==="],
-    ["L 退佣比例", (rateL/100).toFixed(2) + "%"],
-    ["L 退佣金额（元）", Math.round(commissionLYuan)],
-    ["L 获利（元）", Math.round(profitYuan)]
+    ["L 退佣比例", last.rateL > 0 ? (last.rateL/100).toFixed(2) + "%" : "—"],
+    ["L 退佣金额（元）", last.commissionL],
+    ["L 获利（元）", last.profit]
   ];
 
-  // 送房信息
-  if (hotel && roomType) {
-    rows1.push([""]);
-    rows1.push(["=== 送房信息 ==="]);
-    rows1.push(["入住日期", checkInDate ? formatDate(checkInDate) : "—"]);
-    rows1.push(["晚数", nights]);
-    rows1.push(["间数", rooms]);
-    rows1.push(["酒店", hotel]);
-    rows1.push(["房型", roomType]);
-
-    if (roomData[hotel] && roomData[hotel][roomType]) {
-      var rInfo = roomData[hotel][roomType];
-      var reqCode = rInfo.code * nights * rooms * 10000;
-      var dailyResult = calculateDailyDetails(checkInDate, nights, rInfo, hotel);
-      var totalCost = 0;
-      for (var di = 0; di < dailyResult.details.length; di++) totalCost += dailyResult.details[di].price;
-      totalCost *= rooms || 1;
-      if (!dailyResult.details.length) totalCost = rInfo.weekday * nights * rooms;
-      rows1.push(["所需转码（元）", reqCode.toLocaleString()]);
-      rows1.push(["总房价（元）", totalCost.toLocaleString()]);
-
-      // 达标 + 优先送周末/收平日 逻辑
-      var reachedX = amount >= reqCode;
-      if (reachedX) {
-        rows1.push(["达标？", "✓ 达标 · 免费送房！"]);
-      } else {
-        rows1.push(["达标？", "✗ 未达标"]);
-        var gapX = reqCode - amount;
-        rows1.push(["差额", gapX.toLocaleString() + " 元"]);
-
-        // 计算覆盖晚数
-        var codePerNightY = rInfo.code * 10000;
-        var coveredN = Math.floor(amount / codePerNightY);
-        var nightListX = [];
-        if (dailyResult.details.length > 0) {
-          for (var xi = 0; xi < dailyResult.details.length; xi++) {
-            var xnd = dailyResult.details[xi];
-            var po = xnd.type === "特殊日" ? 40 : (xnd.type === "周六" ? 30 : (xnd.type === "周五" ? 20 : 10));
-            nightListX.push({ type: xnd.type, price: xnd.price, order: po });
-          }
-        } else {
-          for (var wi2 = 0; wi2 < nights; wi2++) nightListX.push({ type: "平日", price: rInfo.weekday, order: 10 });
-        }
-        nightListX.sort(function(a,b) { return b.order - a.order; });
-
-        var freeList = [];
-        var paidList = [];
-        var paidTotal = 0;
-        for (var fii = 0; fii < nightListX.length; fii++) {
-          if (fii < coveredN) freeList.push(nightListX[fii]);
-          else { paidList.push(nightListX[fii]); paidTotal += nightListX[fii].price; }
-        }
-        paidTotal *= rooms;
-
-        var freeTypes = {}; var paidTypes = {};
-        for (var fi3=0; fi3<freeList.length; fi3++) freeTypes[freeList[fi3].type] = (freeTypes[freeList[fi3].type]||0)+1;
-        for (var pi3=0; pi3<paidList.length; pi3++) paidTypes[paidList[pi3].type] = (paidTypes[paidList[pi3].type]||0)+1;
-        var freeStr = Object.keys(freeTypes).map(function(k){return freeTypes[k]+"晚"+k}).join("+");
-        var paidStr = Object.keys(paidTypes).map(function(k){return paidTypes[k]+"晚"+k}).join("+");
-        if (!freeStr) freeStr = "0晚";
-        if (!paidStr) paidStr = "无";
-
-        rows1.push(["", "=== 送房分配（优先送周末 / 不足收平日）==="]);
-        rows1.push(["✅ 免费送", freeList.length + " 晚 (" + freeStr + ") — 转码覆盖"]);
-        rows1.push(["❌ 需收费", paidList.length + " 晚 (" + paidStr + ") — 合计 " + paidTotal.toLocaleString() + " 元"]);
-      }
-    }
+  if (last.hotel && last.roomType) {
+    rows2.push([""]);
+    rows2.push(["=== 送房信息 ==="]);
+    rows2.push(["酒店", last.hotel]);
+    rows2.push(["房型", last.roomType]);
+    rows2.push(["入住日期", last.checkInDate || "—"]);
+    rows2.push(["晚数", last.nights || "—"]);
+    rows2.push(["间数", last.rooms || "—"]);
+    rows2.push(["达标？", last.reached ? "✓ 达标" : "✗ 未达标（差 " + (last.gap||0).toLocaleString() + " 元）"]);
   }
 
-  // Sheet 2: Agent 对比
-  var rows2 = [["Agent", "退佣比例", "退佣金额（元）", "L 获利（元）"]];
+  // ---- Sheet 3: Agent 对比（基于最新一笔）----
+  var hall3 = last.hall;
+  var amount3 = last.amount;
+  var rateL3 = last.rateL;
+  var commissionL3 = last.commissionL;
+
+  var rows3 = [["Agent", "退佣比例", "退佣金额（元）", "L 获利（元）"]];
   var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
-  for (var i = 0; i < agents.length; i++) {
-    var ag = agents[i];
-    var r = (rates[ag] && rates[ag][hall]) ? rates[ag][hall] : 0;
-    var cY = amountYuan * r / 10000;
-    var pY = Math.round(commissionLYuan - cY);
-    rows2.push([ag, r > 0 ? (r/100).toFixed(2) + "%" : "—", r > 0 ? Math.round(cY) : "—", ag === "L" ? "—" : pY]);
+  for (var ai = 0; ai < agents.length; ai++) {
+    var ag3 = agents[ai];
+    var r3 = (rates[ag3] && rates[ag3][hall3]) ? rates[ag3][hall3] : 0;
+    var cY3 = amount3 * r3 / 10000;
+    var pY3 = Math.round(commissionL3 - cY3);
+    rows3.push([ag3, r3 > 0 ? (r3/100).toFixed(2) + "%" : "—", r3 > 0 ? Math.round(cY3) : "—", ag3 === "L" ? "—" : pY3]);
   }
 
-  // Sheet 3: 逐日晚价明细
-  var rows3 = [];
-  if (hotel && roomType && roomData[hotel] && roomData[hotel][roomType] && checkInDate) {
-    var rInfo2 = roomData[hotel][roomType];
-    var dr = calculateDailyDetails(checkInDate, nights, rInfo2, hotel);
-    rows3 = [["日期", "星期", "类型", "单价（元）", "间数", "小计（元）"]];
-    for (var idx = 0; idx < dr.details.length; idx++) {
-      var dd = dr.details[idx];
-      rows3.push([dd.date, "周" + dd.weekDay, dd.type, dd.price, rooms, dd.price * rooms]);
-    }
-    if (dr.details.length > 0) {
-      var sumTotal = 0;
-      for (var si = 0; si < dr.details.length; si++) sumTotal += dr.details[si].price * rooms;
-      rows3.push(["", "", "合计", "", "", sumTotal]);
-    }
-  } else {
-    rows3 = [["（需填写入住日期和房型才生成逐日明细）"]];
-  }
-
-  // 创建工作簿
+  // ---- 创建工作簿 ----
   var wb = XLSX.utils.book_new();
   var ws1 = XLSX.utils.aoa_to_sheet(rows1);
   var ws2 = XLSX.utils.aoa_to_sheet(rows2);
   var ws3 = XLSX.utils.aoa_to_sheet(rows3);
 
   // 设置列宽
-  ws1['!cols'] = [{ wch: 20 }, { wch: 30 }];
-  ws2['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 16 }];
-  ws3['!cols'] = [{ wch: 14 }, { wch: 8 }, { wch: 10 }, { wch: 14 }, { wch: 8 }, { wch: 14 }];
+  ws1['!cols'] = [{wch:4},{wch:20},{wch:8},{wch:18},{wch:10},{wch:16},{wch:14},{wch:10},{wch:10},{wch:14},{wch:12},{wch:10},{wch:12},{wch:10},{wch:6},{wch:18}];
+  ws2['!cols'] = [{ wch: 18 }, { wch: 35 }];
+  ws3['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 16 }];
 
-  XLSX.utils.book_append_sheet(wb, ws1, "计算结果");
-  XLSX.utils.book_append_sheet(wb, ws2, "Agent对比");
-  XLSX.utils.book_append_sheet(wb, ws3, "逐日晚价");
+  XLSX.utils.book_append_sheet(wb, ws1, "全部记录");
+  XLSX.utils.book_append_sheet(wb, ws2, "最新详情");
+  XLSX.utils.book_append_sheet(wb, ws3, "Agent对比");
 
-  // 文件名含时间
+  // 文件名：日期_笔数
   var ts = new Date();
-  var fname = "酒店计算_" + ts.getFullYear() +
+  var fname = "酒店计算记录_" + ts.getFullYear() +
     String(ts.getMonth()+1).padStart(2,'0') +
-    String(ts.getDate()).padStart(2,'0') + "_" +
-    String(ts.getHours()).padStart(2,'0') +
-    String(ts.getMinutes()).padStart(2,'0') + ".xlsx";
+    String(ts.getDate()).padStart(2,'0') +
+    "_" + history.length + "笔.xlsx";
 
   XLSX.writeFile(wb, fname);
+
+  // 更新按钮文字显示记录数
+  document.getElementById("exportBtn").textContent =
+    "📊 导出 Excel（已存 " + history.length + " 笔记录）";
+}
+
+// ===== 清除历史记录 =====
+function clearHistory() {
+  var history = JSON.parse(localStorage.getItem('hotelCalc_history') || '[]');
+  if (history.length === 0) {
+    alert("目前没有任何记录。");
+    return;
+  }
+  if (!confirm("确定要清除全部 " + history.length + " 笔计算记录吗？\n（清除后无法恢复）")) return;
+  localStorage.removeItem('hotelCalc_history');
+  document.getElementById("exportBtn").textContent = "📊 导出 Excel";
+  alert("已清除全部记录。");
 }
 
 // 初始化
 updateRoomType();
+
+// 显示已存记录数
+(function() {
+  var h = JSON.parse(localStorage.getItem('hotelCalc_history') || '[]');
+  if (h.length > 0) {
+    document.getElementById("exportBtn").textContent =
+      "📊 导出 Excel（已存 " + h.length + " 笔记录）";
+  }
+})();
 
 // 设置默认日期为今天
 document.getElementById("checkInDate").valueAsDate = new Date();
