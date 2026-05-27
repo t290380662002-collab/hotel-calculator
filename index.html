@@ -487,6 +487,102 @@ function calculate() {
       rhtml += "<tr><td>达标？</td><td><span class=\"badge-ok\">✓ 达标 · 免费送房！</span>&nbsp;<span style=\"font-size:12px;color:#2e7d32;\">（超出 " + gap.toLocaleString() + " 元）</span></td></tr>";
     } else {
       rhtml += "<tr><td>达标？</td><td><span class=\"badge-no\">✗ 未达标 · 需收房费</span>&nbsp;<span style=\"font-size:12px;color:#d32f2f;\">（还差 " + gap.toLocaleString() + " 元）</span></td></tr>";
+
+      // ========== 优先送周末、收平日 计算逻辑 ==========
+      // 每晚所需转码量（元）
+      var codePerNightYuan = requiredCodePerNight * 10000;
+      // 实际转码能覆盖几晚
+      var coveredNightsFloat = amount / codePerNightYuan;
+      var coveredNights = Math.floor(coveredNightsFloat);
+
+      // 将所有夜晚按价格从高到低排序：特殊日 > 周六 > 周五 > 平日
+      var nightList = [];
+      if (dailyResult.details.length > 0) {
+        for (var ni = 0; ni < dailyResult.details.length; ni++) {
+          var nd = dailyResult.details[ni];
+          var priceOrder = 0; // 数字越大越贵
+          if (nd.type === "特殊日") priceOrder = 40;
+          else if (nd.type === "周六") priceOrder = 30;
+          else if (nd.type === "周五") priceOrder = 20;
+          else priceOrder = 10; // 平日
+          nightList.push({ idx: ni, date: nd.date, weekDay: nd.weekDay, type: nd.type, price: nd.price, order: priceOrder });
+        }
+      } else {
+        // 没有日期信息，全部按平日算
+        for (var wi = 0; wi < nights; wi++) {
+          nightList.push({ idx: wi, date: "-", weekDay: "-", type: "平日", price: rInfo.weekday, order: 10 });
+        }
+      }
+      // 按价格降序排列（贵的排前面，优先免费）
+      nightList.sort(function(a,b) { return b.order - a.order; });
+
+      // 划分：前 coveredNights 晚 = 免费（送），后面 = 收费
+      var freeNights = [];
+      var paidNights = [];
+      var totalPaidCost = 0;
+
+      for (var fi = 0; fi < nightList.length; fi++) {
+        if (fi < coveredNights) {
+          freeNights.push(nightList[fi]);
+        } else {
+          paidNights.push(nightList[fi]);
+          totalPaidCost += nightList[fi].price;
+        }
+      }
+      totalPaidCost *= rooms; // 多间要乘
+
+      // 显示分配结果
+      if (freeNights.length > 0 || paidNights.length > 0) {
+        rhtml += "<tr style=\"background:#fff8e1\"><td colspan=\"2\"><strong style=\"font-size:13px;color:#e65100;\">📋 送房分配（优先送周末 / 不足收平日）</strong></td></tr>";
+
+        // 免费部分
+        var freeText = "";
+        var freeCountWeekday = 0, freeCountFri = 0, freeCountSat = 0, freeCountSpecial = 0;
+        for (var fgi = 0; fgi < freeNights.length; fgi++) {
+          var fn = freeNights[fgi];
+          if (fn.type === "特殊日") freeCountSpecial++;
+          else if (fn.type === "周六") freeCountSat++;
+          else if (fn.type === "周五") freeCountFri++;
+          else freeCountWeekday++;
+        }
+        var freeParts = [];
+        if (freeCountSpecial > 0) freeParts.push(freeCountSpecial + "晚特殊");
+        if (freeCountSat > 0) freeParts.push(freeCountSat + "晚周六");
+        if (freeCountFri > 0) freeParts.push(freeCountFri + "晚周五");
+        if (freeCountWeekday > 0) freeParts.push(freeCountWeekday + "晚平日");
+
+        rhtml += "<tr><td>✅ 免费送</td><td>" +
+          "<span style=\"color:#2e7d32;font-weight:bold\">" + freeNights.length + " 晚</span> (" + freeParts.join(" + ") + ") · 转码覆盖</td></tr>";
+
+        // 收费部分
+        var paidCountWeekday = 0, paidCountFri = 0, paidCountSat = 0, paidCountSpecial = 0;
+        for (var pgi = 0; pgi < paidNights.length; pgi++) {
+          var pn = paidNights[pgi];
+          if (pn.type === "特殊日") paidCountSpecial++;
+          else if (pn.type === "周六") paidCountSat++;
+          else if (pn.type === "周五") paidCountFri++;
+          else paidCountWeekday++;
+        }
+        var paidParts = [];
+        if (paidCountSpecial > 0) paidParts.push(paidCountSpecial + "晚特殊×" + rInfo.special);
+        if (paidCountSat > 0) paidParts.push(paidCountSat + "晚周六×" + (rInfo.saturday||rInfo.weekend));
+        if (paidCountFri > 0) paidParts.push(paidCountFri + "晚周五×" + (rInfo.friday||rInfo.weekend));
+        if (paidCountWeekday > 0) paidParts.push(paidCountWeekday + "晚平日×" + rInfo.weekday);
+
+        var paidDetail = paidParts.join(" + ");
+        if (rooms > 1) paidDetail += " ×" + rooms;
+
+        rhtml += "<tr><td>❌ 需收费</td><td>" +
+          "<span style=\"color:#d32f2f;font-weight:bold\">" + paidNights.length + " 晚</span> (" + paidDetail + ")" +
+          "&nbsp;=<span style=\"color:#d32f2f;font-weight:bold\"> " + totalPaidCost.toLocaleString() + " 元</span></td></tr>";
+      }
+
+      // 如果转码不够覆盖任何一晚
+      if (coveredNights <= 0) {
+        rhtml += "<tr style=\"background:#fff8e1\"><td colspan=\"2\"><strong style=\"font-size:13px;color:#e65100;\">📋 送房分配</strong></td></tr>";
+        rhtml += "<tr><td>✅ 免费送</td><td><span style=\"color:#888\">0 晚（转码不足覆盖任何一晚）</span></td></tr>";
+        rhtml += "<tr><td>❌ 需收费</td><td><span style=\"color:#d32f2f;font-weight:bold\">" + nights + " 晚全部收费</span> · 合计 " + totalRoomCost.toLocaleString() + " 元</td></tr>";
+      }
     }
 
     document.getElementById("roomResultTable").innerHTML = rhtml;
@@ -599,7 +695,52 @@ function exportToExcel() {
       if (!dailyResult.details.length) totalCost = rInfo.weekday * nights * rooms;
       rows1.push(["所需转码（元）", reqCode.toLocaleString()]);
       rows1.push(["总房价（元）", totalCost.toLocaleString()]);
-      rows1.push(["达标？", amount >= reqCode ? "✓ 达标" : "✗ 未达标"]);
+
+      // 达标 + 优先送周末/收平日 逻辑
+      var reachedX = amount >= reqCode;
+      if (reachedX) {
+        rows1.push(["达标？", "✓ 达标 · 免费送房！"]);
+      } else {
+        rows1.push(["达标？", "✗ 未达标"]);
+        var gapX = reqCode - amount;
+        rows1.push(["差额", gapX.toLocaleString() + " 元"]);
+
+        // 计算覆盖晚数
+        var codePerNightY = rInfo.code * 10000;
+        var coveredN = Math.floor(amount / codePerNightY);
+        var nightListX = [];
+        if (dailyResult.details.length > 0) {
+          for (var xi = 0; xi < dailyResult.details.length; xi++) {
+            var xnd = dailyResult.details[xi];
+            var po = xnd.type === "特殊日" ? 40 : (xnd.type === "周六" ? 30 : (xnd.type === "周五" ? 20 : 10));
+            nightListX.push({ type: xnd.type, price: xnd.price, order: po });
+          }
+        } else {
+          for (var wi2 = 0; wi2 < nights; wi2++) nightListX.push({ type: "平日", price: rInfo.weekday, order: 10 });
+        }
+        nightListX.sort(function(a,b) { return b.order - a.order; });
+
+        var freeList = [];
+        var paidList = [];
+        var paidTotal = 0;
+        for (var fii = 0; fii < nightListX.length; fii++) {
+          if (fii < coveredN) freeList.push(nightListX[fii]);
+          else { paidList.push(nightListX[fii]); paidTotal += nightListX[fii].price; }
+        }
+        paidTotal *= rooms;
+
+        var freeTypes = {}; var paidTypes = {};
+        for (var fi3=0; fi3<freeList.length; fi3++) freeTypes[freeList[fi3].type] = (freeTypes[freeList[fi3].type]||0)+1;
+        for (var pi3=0; pi3<paidList.length; pi3++) paidTypes[paidList[pi3].type] = (paidTypes[paidList[pi3].type]||0)+1;
+        var freeStr = Object.keys(freeTypes).map(function(k){return freeTypes[k]+"晚"+k}).join("+");
+        var paidStr = Object.keys(paidTypes).map(function(k){return paidTypes[k]+"晚"+k}).join("+");
+        if (!freeStr) freeStr = "0晚";
+        if (!paidStr) paidStr = "无";
+
+        rows1.push(["", "=== 送房分配（优先送周末 / 不足收平日）==="]);
+        rows1.push(["✅ 免费送", freeList.length + " 晚 (" + freeStr + ") — 转码覆盖"]);
+        rows1.push(["❌ 需收费", paidList.length + " 晚 (" + paidStr + ") — 合计 " + paidTotal.toLocaleString() + " 元"]);
+      }
     }
   }
 
