@@ -425,9 +425,7 @@ function calculate() {
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
   if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
   html += "<tr class=\"total-row\"><td>实出码粮</td><td><strong>" + Math.round(actualPayYuan).toLocaleString() + " 元</strong></td></tr>";
-  if (agent !== "L") {
-    html += "<tr style=\"background:#e3f2fd\" class=\"total-row\"><td>L 获利（价差）</td><td>" + Math.round(profitYuan).toLocaleString() + " 元</td></tr>";
-  }
+  html += "<tr style=\"background:#e3f2fd\" class=\"total-row\"><td>L 获利（价差）</td><td>" + (agent === "L" ? "0" : Math.round(profitYuan).toLocaleString()) + " 元</td></tr>";
   document.getElementById("resultTable").innerHTML = html;
 
   // ========== 送房达标判断 ==========
