@@ -242,15 +242,16 @@ const roomData = {
   },
 
   "永利皇宫": {
-    "大床":              { code: 160,  weekday: 1623,  weekend: 2370 },
-    "双床":              { code: 180,  weekday: 1910,  weekend: 2715 },
-    "湖景大床":          { code: 220,  weekday: 2198,  weekend: 3118 },
-    "湖景双床":          { code: 240,  weekday: 2313,  weekend: 3233 },
-    "行政套房":          { code: 190,  weekday: 1968,  weekend: 2773 },
-    "珀丽套":            { code: 230,  weekday: 2198,  weekend: 3118 },
-    "珀丽双套":          { code: 230,  weekday: 2313,  weekend: 3233 },
-    "湖景珀丽套":        { code: 390,  weekday: 3060,  weekend: 4440 },
-    "湖景尊尚珀丽套":    { code: 390,  weekday: 6050,  weekend: 9500 }
+    // 永利皇宫：平日/週末洗碼不同，週五週六用週末洗碼
+    "大床":              { code: 160,  weekendCode: 250,  weekday: 1623,  weekend: 2370 },
+    "双床":              { code: 180,  weekendCode: 270,  weekday: 1910,  weekend: 2715 },
+    "湖景大床":          { code: 220,  weekendCode: 320,  weekday: 2198,  weekend: 3118 },
+    "湖景双床":          { code: 240,  weekendCode: 340,  weekday: 2313,  weekend: 3233 },
+    "行政套房":          { code: 190,  weekendCode: 280,  weekday: 1968,  weekend: 2773 },
+    "珀丽套":            { code: 230,  weekendCode: 320,  weekday: 2198,  weekend: 3118 },
+    "珀丽双套":          { code: 230,  weekendCode: 320,  weekday: 2313,  weekend: 3233 },
+    "湖景珀丽套":        { code: 390,  weekendCode: 580,  weekday: 3060,  weekend: 4440 },
+    "湖景尊尚珀丽套":    { code: 390,  weekendCode: 580,  weekday: 6050,  weekend: 9500 }
   },
 
   "上葡京": {
@@ -424,8 +425,27 @@ function calculate() {
     showRoomResult = true;
     var rInfo = roomData[hotel][roomType];
 
+    // 永利皇宫：週五週六用 weekendCode，平日用 code
     var requiredCodePerNight = rInfo.code;
-    var requiredTotalCode = requiredCodePerNight * nights * rooms;
+    if (hotel === "永利皇宫" && rInfo.weekendCode !== undefined) {
+      // 根據入住日期判斷每晚用哪個code
+      var dTemp = new Date(checkInDate + "T00:00:00");
+      requiredTotalCode = 0;
+      for (var ci = 0; ci < nights; ci++) {
+        var dayTemp = dTemp.getDay();
+        if (dayTemp === 5 || dayTemp === 6) {
+          requiredTotalCode += rInfo.weekendCode;
+        } else {
+          requiredTotalCode += rInfo.code;
+        }
+        dTemp.setDate(dTemp.getDate() + 1);
+      }
+      requiredTotalCode *= rooms;
+      // 取平均值作為每晚code（用於後續覆蓋計算）
+      requiredCodePerNight = Math.round(requiredTotalCode / (nights * rooms));
+    } else {
+      var requiredTotalCode = requiredCodePerNight * nights * rooms;
+    }
 
     // 使用逐日計算方式計算總房價
     var dailyResult = calculateDailyDetails(checkInDate, nights, rInfo, hotel);
