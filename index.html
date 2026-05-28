@@ -134,6 +134,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
 
   <!-- Agent 价差对比已隐藏，仅在 Excel 中导出 -->
   <button class="btn" id="exportBtn" onclick="exportToExcel()" style="margin-top:12px; background:#2e7d32;">📊 导出 Excel</button>
+  <button class="btn" id="pngBtn" onclick="exportToPNG()" style="margin-top:12px; margin-left:8px; background:#1565c0;">📷 生成 PNG</button>
   <button class="btn" id="clearHistoryBtn" onclick="clearHistory()" style="margin-top:12px; margin-left:8px; background:#757575; font-size:13px;">🗑 清除记录</button>
 </div>
 
@@ -812,6 +813,47 @@ function clearHistory() {
   localStorage.removeItem('hotelCalc_history');
   document.getElementById("exportBtn").textContent = "📊 导出 Excel";
   alert("已清除全部记录。");
+}
+
+// ===== 生成 PNG 截图（计算结果+送房判断） =====
+function exportToPNG() {
+  var resultCard = document.getElementById("result");
+  if (resultCard.style.display === "none") {
+    alert("请先进行计算！");
+    return;
+  }
+
+  // 使用 html2canvas 截图
+  if (typeof html2canvas === 'undefined') {
+    // 动态加载 html2canvas
+    var script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload = function() { doCapture(); };
+    document.head.appendChild(script);
+  } else {
+    doCapture();
+  }
+
+  function doCapture() {
+    // 臨時隱藏按鈕
+    var btns = resultCard.querySelectorAll('.btn');
+    btns.forEach(function(b) { b.style.display = 'none'; });
+
+    html2canvas(resultCard, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false
+    }).then(function(canvas) {
+      // 恢復按鈕
+      btns.forEach(function(b) { b.style.display = ''; });
+
+      var link = document.createElement('a');
+      link.download = '澳門1.0_計算結果_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '') + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
 }
 
 // 初始化
