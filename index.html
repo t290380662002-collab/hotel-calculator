@@ -567,12 +567,7 @@ function calculate() {
           "&nbsp;=<span style=\"color:#d32f2f;font-weight:bold\"> " + totalPaidCost.toLocaleString() + " 元</span></td></tr>";
       }
 
-      // 如果转码不够覆盖任何一晚
-      if (coveredNights <= 0) {
-        rhtml += "<tr style=\"background:#fff8e1\"><td colspan=\"2\"><strong style=\"font-size:13px;color:#e65100;\">📋 送房分配</strong></td></tr>";
-        rhtml += "<tr><td>✅ 免费送</td><td><span style=\"color:#888\">0 晚（转码不足覆盖任何一晚）</span></td></tr>";
-        rhtml += "<tr><td>❌ 需收费</td><td><span style=\"color:#d32f2f;font-weight:bold\">" + nights + " 晚全部收费</span> · 合计 " + totalRoomCost.toLocaleString() + " 元</td></tr>";
-      }
+      // coveredNights <= 0 的情况已在上面 freeNights.length === 0 时处理，无需重复
     }
 
     document.getElementById("roomResultTable").innerHTML = rhtml;
