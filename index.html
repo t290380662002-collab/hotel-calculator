@@ -132,9 +132,7 @@ input[readonly] { background:#f0f0f0; color:#333; font-weight:bold; }
     <div id="dateDetail" class="date-detail" style="display:none;"></div>
   </div>
 
-  <div class="card-title" style="margin-top:18px;">全部 Agent 价差对比</div>
-  <table class="compare-table" id="compareTable"></table>
-  <div class="note">绿色＝你赚（价差为正）；红色＝你亏；灰色＝没价差</div>
+  <!-- Agent 价差对比已隐藏，仅在 Excel 中导出 -->
   <button class="btn" id="exportBtn" onclick="exportToExcel()" style="margin-top:12px; background:#2e7d32;">📊 导出 Excel</button>
   <button class="btn" id="clearHistoryBtn" onclick="clearHistory()" style="margin-top:12px; margin-left:8px; background:#757575; font-size:13px;">🗑 清除记录</button>
 </div>
@@ -425,7 +423,6 @@ function calculate() {
   if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
   if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
   html += "<tr class=\"total-row\"><td>实出码粮</td><td><strong>" + Math.round(actualPayYuan).toLocaleString() + " 元</strong></td></tr>";
-  html += "<tr style=\"background:#e3f2fd\" class=\"total-row\"><td>L 获利（价差）</td><td>" + (agent === "L" ? "0" : Math.round(profitYuan).toLocaleString()) + " 元</td></tr>";
   document.getElementById("resultTable").innerHTML = html;
 
   // ========== 送房达标判断 ==========
@@ -608,23 +605,8 @@ function calculate() {
 
   document.getElementById("roomResult").style.display = showRoomResult ? "block" : "none";
 
-  // ========== Agent 对比表 ==========
-  var chtml = "<tr><th>Agent</th><th>退佣比例</th><th>退佣金额（元）</th><th>L 获利（元）</th></tr>";
-  var agents = ["L","陈姐","洪大哥","李总","大圣","Ring"];
-  for (var i = 0; i < agents.length; i++) {
-    var ag = agents[i];
-    var r = (rates[ag] && rates[ag][hall]) ? rates[ag][hall] : 0;
-    var cYuan = amountYuan * r / 10000;
-    var pYuan = Math.round(commissionLYuan - cYuan);
-    var cls = "profit-zero";
-    if (ag !== "L") {
-      if (pYuan > 0) cls = "profit-pos";
-      else if (pYuan < 0) cls = "profit-neg";
-    }
-    var marker = (ag === agent) ? "★ " : "　";
-    chtml += "<tr><td>" + marker + ag + "</td><td>" + (r > 0 ? (r/100).toFixed(2) + "%" : "—") + "</td><td>" + (r > 0 ? Math.round(cYuan).toLocaleString() : "—") + "</td><td class=\"" + cls + "\">" + (ag === "L" ? "—" : ((pYuan >= 0 ? "+" : "") + pYuan.toLocaleString())) + "</td></tr>";
-  }
-  document.getElementById("compareTable").innerHTML = chtml;
+  // ========== Agent 对比表（仅用于 Excel 导出，不显示在页面） ==========
+  // 数据保留在 calculate() 变量中，供 exportToExcel() 使用
 
   document.getElementById("result").style.display = "block";
   window.scrollTo({ top: document.getElementById("result").offsetTop - 10, behavior: "smooth" });
