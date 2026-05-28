@@ -406,6 +406,8 @@ function calculate() {
   var commissionYuan = amountYuan * rateAgent / 10000;
   var commissionLYuan = amountYuan * rateL / 10000;
 
+  // ========== 计算结果构建（延迟到送房判断后） ==========
+  // 先计算基本退佣
   var actualPayYuan = commissionYuan - carFee - roomFee;
   var profitYuan = commissionLYuan - commissionYuan;
 
@@ -413,17 +415,6 @@ function calculate() {
   console.log("【调试】转码金额:", amountYuan, "元");
   console.log("【调试】退佣比例:", rateAgent, "=", (rateAgent/100).toFixed(2) + "%");
   console.log("【调试】退佣金额:", Math.round(commissionYuan), "元");
-
-  var html = "";
-  html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
-  html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
-  html += "<tr><td>退佣比例</td><td>" + (rateAgent/100).toFixed(2) + "%</td></tr>";
-  html += "<tr><td>转码金额</td><td>" + amountYuan.toLocaleString() + " 元</td></tr>";
-  html += "<tr><td>退佣金额</td><td><strong style=\"color:#d32f2f; font-size:16px;\">" + Math.round(commissionYuan).toLocaleString() + " 元</strong></td></tr>";
-  if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
-  if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
-  html += "<tr class=\"total-row\"><td>实出码粮</td><td><strong>" + Math.round(actualPayYuan).toLocaleString() + " 元</strong></td></tr>";
-  document.getElementById("resultTable").innerHTML = html;
 
   // ========== 送房达标判断 ==========
   var showRoomResult = false;
@@ -604,6 +595,32 @@ function calculate() {
   }
 
   document.getElementById("roomResult").style.display = showRoomResult ? "block" : "none";
+
+  // ========== 构建计算结果表格（含需收房费） ==========
+  var html = "";
+  html += "<tr><td>Agent</td><td>" + agent + "</td></tr>";
+  html += "<tr><td>厅别</td><td>" + (hallMap[hall]||hall) + " — " + hall + "</td></tr>";
+  html += "<tr><td>退佣比例</td><td>" + (rateAgent/100).toFixed(2) + "%</td></tr>";
+  html += "<tr><td>转码金额</td><td>" + amountYuan.toLocaleString() + " 元</td></tr>";
+  html += "<tr><td>退佣金额</td><td><strong style=\"color:#d32f2f; font-size:16px;\">" + Math.round(commissionYuan).toLocaleString() + " 元</strong></td></tr>";
+  if (carFee > 0) html += "<tr class=\"highlight-row\"><td>扣：车费</td><td>- " + carFee.toLocaleString() + " 元</td></tr>";
+  if (roomFee > 0) html += "<tr class=\"highlight-row\"><td>扣：房消</td><td>- " + roomFee.toLocaleString() + " 元</td></tr>";
+
+  // 未达标时显示需收房费，并扣减实出码粮
+  var roomCharge = 0;
+  if (showRoomResult && !reached) {
+    // 使用优先送周末后的实际收费金额
+    if (typeof totalPaidCost !== 'undefined' && totalPaidCost > 0) {
+      roomCharge = totalPaidCost;
+    } else {
+      roomCharge = totalRoomCost;
+    }
+    html += "<tr class=\"highlight-row\"><td>扣：需收房费</td><td style=\"color:#d32f2f\">- " + roomCharge.toLocaleString() + " 元</td></tr>";
+    actualPayYuan = commissionYuan - carFee - roomFee - roomCharge;
+  }
+
+  html += "<tr class=\"total-row\"><td>实出码粮</td><td><strong>" + Math.round(actualPayYuan).toLocaleString() + " 元</strong></td></tr>";
+  document.getElementById("resultTable").innerHTML = html;
 
   // ========== Agent 对比表（仅用于 Excel 导出，不显示在页面） ==========
   // 数据保留在 calculate() 变量中，供 exportToExcel() 使用
