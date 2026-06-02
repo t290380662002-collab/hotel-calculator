@@ -383,8 +383,8 @@ function renderMgmtList() {
 }
 
 function renderMgmtForm(agents, idx) {
-  var agent = (idx >= 0 && idx < agents.length) ? agents[idx] : { name: "", rates: {} };
-  var isNew = (idx < 0 || idx >= agents.length);
+  var isNew = (idx === -2);
+  var agent = (!isNew && idx >= 0 && idx < agents.length) ? agents[idx] : { name: "", rates: {} };
   var html = '<div class="mgmt-form"><div class="row"><div class="field"><label>Agent 名称</label><input type="text" id="mgmtName" value="' + (isNew ? "" : agent.name) + '" placeholder="输入名称"></div></div>';
   html += '<div style="font-size:11px;color:#555;margin-bottom:6px;">各廳退佣比例（萬分之 N，0 = 不收）</div><div class="row" style="flex-wrap:wrap;">';
   for (var h = 0; h < hallList.length; h++) {
@@ -426,20 +426,20 @@ function saveMgmtAgent(idx) {
   var name = nameInput.value.trim();
   if (!name) { alert("请输入 Agent 名称！"); return; }
 
+  var isNew = (idx === -2);
   var agents = getAgents();
-  var isNew = (idx < 0 || idx >= agents.length);
 
   // 检查重名（排除自身）
   for (var i = 0; i < agents.length; i++) {
-    if (i === idx) continue;
+    if (isNew ? true : (i === idx)) continue;
     if (agents[i].name === name) {
       alert("Agent \"" + name + "\" 已存在！");
       return;
     }
   }
 
-  var ratesInputs = document.querySelectorAll(".mgmt-rate");
   var newRates = {};
+  var ratesInputs = document.querySelectorAll(".mgmt-rate");
   for (var j = 0; j < ratesInputs.length; j++) {
     var hall = ratesInputs[j].getAttribute("data-hall");
     var val = parseInt(ratesInputs[j].value) || 0;
