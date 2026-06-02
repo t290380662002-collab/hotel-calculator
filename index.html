@@ -376,7 +376,7 @@ function renderMgmtList() {
     html += '</td></tr>';
   }
   html += '</table>';
-  if (mgmtEditingIndex >= 0) {
+  if (mgmtEditingIndex !== -1) {
     html += renderMgmtForm(agents, mgmtEditingIndex);
   }
   document.getElementById("mgmtContent").innerHTML = html;
